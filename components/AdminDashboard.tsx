@@ -49,12 +49,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ departments, onCreateEx
 
     return (
         <div className="max-w-4xl mx-auto">
-            <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg">
-                 <div className="flex justify-between items-center mb-6 pb-4 border-b">
-                    <h1 className="text-3xl font-extrabold text-gray-900">Admin Panel</h1>
+            <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg dark:bg-gray-900">
+                 <div className="flex justify-between items-center mb-6 pb-4 border-b dark:border-gray-700">
+                    <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">Admin Panel</h1>
                     <button 
                         onClick={onClose} 
-                        className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
                     >
                         Close
                     </button>
@@ -63,28 +63,28 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ departments, onCreateEx
                 {/* Create Experiment Section */}
                 <section>
                     <form onSubmit={handleCreateSubmit} className="space-y-6">
-                        <h2 className="text-2xl font-bold text-gray-800">Create New Experiment</h2>
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Create New Experiment</h2>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                                <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Department</label>
                                 <select
                                     id="department"
                                     value={selectedDeptId}
                                     onChange={(e) => setSelectedDeptId(e.target.value)}
-                                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
+                                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                                 >
                                     {departments.map(dept => <option key={dept.id} value={dept.id}>{dept.name}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Subject</label>
                                 <select
                                     id="subject"
                                     value={selectedSubjId}
                                     onChange={(e) => setSelectedSubjId(e.target.value)}
                                     disabled={availableSubjects.length === 0}
-                                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md disabled:bg-gray-100"
+                                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md disabled:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:disabled:bg-gray-800"
                                 >
                                     {availableSubjects.map(subj => <option key={subj.id} value={subj.id}>{subj.name}</option>)}
                                 </select>
@@ -92,26 +92,26 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ departments, onCreateEx
                         </div>
 
                         <div>
-                            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Experiment Title</label>
+                            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Experiment Title</label>
                             <input
                                 type="text"
                                 id="title"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="e.g., Implement a Singly Linked List"
-                                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400"
                             />
                         </div>
 
                         <div>
-                            <label htmlFor="objective" className="block text-sm font-medium text-gray-700 mb-1">Objective</label>
+                            <label htmlFor="objective" className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Objective</label>
                             <textarea
                                 id="objective"
                                 rows={4}
                                 value={objective}
                                 onChange={(e) => setObjective(e.target.value)}
                                 placeholder="Describe the main goal of this experiment..."
-                                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400"
                             />
                         </div>
                         
@@ -127,21 +127,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ departments, onCreateEx
                 </section>
 
                 {/* Manage Experiments Section */}
-                <section className="mt-10 pt-6 border-t border-gray-200">
-                    <h2 className="text-2xl font-bold text-gray-800">Manage Existing Experiments</h2>
+                <section className="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Manage Existing Experiments</h2>
                     <div className="mt-6 space-y-6">
                         {departments.map(dept => (
                             <div key={dept.id}>
-                                <h3 className="text-lg font-semibold text-gray-700 bg-gray-100 p-2 rounded-md">{dept.name}</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 bg-gray-100 p-2 rounded-md dark:bg-gray-800 dark:text-gray-300">{dept.name}</h3>
                                 <div className="mt-4 space-y-4 pl-4">
                                     {dept.subjects.map(subj => (
                                         <div key={subj.id}>
-                                            <h4 className="text-md font-medium text-gray-600">{subj.name}</h4>
+                                            <h4 className="text-md font-medium text-gray-600 dark:text-gray-400">{subj.name}</h4>
                                             <ul className="mt-2 space-y-2">
                                                 {subj.experiments.length > 0 ? (
                                                     subj.experiments.map(exp => (
-                                                        <li key={exp.id} className="flex justify-between items-center p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                                            <span className="text-gray-800 text-sm">{exp.title}</span>
+                                                        <li key={exp.id} className="flex justify-between items-center p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-800/50 dark:border-gray-700 dark:hover:bg-gray-800">
+                                                            <span className="text-gray-800 text-sm dark:text-gray-200">{exp.title}</span>
                                                             <button
                                                                 onClick={() => handleDeleteClick(subj.id, exp.id, exp.title)}
                                                                 className="flex items-center space-x-2 text-red-600 hover:text-red-800 font-medium text-sm p-2 -m-2 rounded-md transition-colors"
@@ -153,7 +153,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ departments, onCreateEx
                                                         </li>
                                                     ))
                                                 ) : (
-                                                    <li className="text-gray-500 italic text-sm px-3">No experiments in this subject.</li>
+                                                    <li className="text-gray-500 italic text-sm px-3 dark:text-gray-500">No experiments in this subject.</li>
                                                 )}
                                             </ul>
                                         </div>

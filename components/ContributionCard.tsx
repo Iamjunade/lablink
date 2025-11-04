@@ -85,19 +85,19 @@ const ContributionCard: React.FC<{
     };
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg p-5 transition-shadow hover:shadow-md">
+        <div className="bg-white border border-gray-200 rounded-lg p-5 transition-shadow hover:shadow-md dark:bg-gray-900/70 dark:border-gray-800 dark:hover:border-primary-900">
             <div className="flex justify-between items-start">
                 <div>
                     <div className="flex items-center space-x-3">
-                       <p className="text-sm font-semibold text-gray-800">{contribution.author}</p>
+                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{contribution.author}</p>
                        {contribution.isAiGenerated && (
-                           <span className="flex items-center text-xs font-medium bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+                           <span className="flex items-center text-xs font-medium bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full dark:bg-purple-900/50 dark:text-purple-300">
                                <SparklesIcon className="w-3 h-3 mr-1" />
                                AI Generated
                            </span>
                        )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">{new Date(contribution.createdAt).toLocaleDateString()}</p>
+                    <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">{new Date(contribution.createdAt).toLocaleDateString()}</p>
                 </div>
                 <div className="flex items-center space-x-2">
                     <button 
@@ -105,8 +105,8 @@ const ContributionCard: React.FC<{
                         disabled={isUpvoted}
                         className={`flex items-center space-x-2 text-sm font-medium p-2 -m-2 rounded-md transition-colors ${
                             isUpvoted 
-                            ? 'text-primary-600 cursor-default' 
-                            : 'text-gray-500 hover:text-primary-600 hover:bg-primary-50'
+                            ? 'text-primary-600 dark:text-primary-400 cursor-default' 
+                            : 'text-gray-500 hover:text-primary-600 hover:bg-primary-50 dark:text-gray-400 dark:hover:text-primary-400 dark:hover:bg-gray-800'
                         }`}
                         aria-pressed={isUpvoted}
                     >
@@ -116,7 +116,7 @@ const ContributionCard: React.FC<{
                     {isAdminAuthenticated && (
                         <button 
                             onClick={onDelete}
-                            className="p-2 -m-2 text-gray-400 hover:text-red-600 rounded-md transition-colors"
+                            className="p-2 -m-2 text-gray-400 hover:text-red-600 dark:hover:text-red-500 rounded-md transition-colors"
                             aria-label="Delete contribution"
                         >
                             <TrashIcon className="w-5 h-5" />
@@ -127,10 +127,10 @@ const ContributionCard: React.FC<{
             <div className="mt-4">
                 {contribution.type === ContributionType.Code && (
                     /* The `language-xxxx` class and the `prism-tomorrow` theme in index.html work together for highlighting. */
-                    <div className="bg-gray-900 rounded-md text-sm">
-                         <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700">
+                    <div className="bg-gray-900 rounded-md text-sm dark:bg-black/50">
+                         <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700 dark:border-gray-800">
                             <span className="text-xs font-semibold text-gray-400 uppercase">{contribution.language || 'Code'}</span>
-                            <button onClick={handleCopy} className="flex items-center space-x-1 text-xs text-gray-400 hover:text-white">
+                            <button onClick={handleCopy} className="flex items-center space-x-1 text-xs text-gray-400 hover:text-white dark:hover:text-gray-200">
                                 <CopyIcon className="w-4 h-4" />
                                 <span>{copyStatus}</span>
                             </button>
@@ -140,17 +140,17 @@ const ContributionCard: React.FC<{
                 )}
                  {contribution.type === ContributionType.Viva && (
                     <div className="space-y-2">
-                        <p className="font-semibold text-gray-800">{contribution.question}</p>
-                        <p className="text-gray-600">{contribution.content}</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-200">{contribution.question}</p>
+                        <p className="text-gray-600 dark:text-gray-400">{contribution.content}</p>
                     </div>
                 )}
                 {contribution.type === ContributionType.Theory && (
-                     <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{contribution.content}</p>
+                     <p className="text-gray-700 leading-relaxed whitespace-pre-wrap dark:text-gray-300">{contribution.content}</p>
                 )}
                 {contribution.type === ContributionType.Diagram && (
                     <div>
-                        <img src={contribution.imageUrl} alt={contribution.content} className="rounded-lg max-w-full h-auto border"/>
-                        <p className="text-center mt-2 text-sm text-gray-600 italic">{contribution.content}</p>
+                        <img src={contribution.imageUrl} alt={contribution.content} className="rounded-lg max-w-full h-auto border dark:border-gray-700"/>
+                        <p className="text-center mt-2 text-sm text-gray-600 italic dark:text-gray-400">{contribution.content}</p>
                     </div>
                 )}
             </div>

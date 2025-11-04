@@ -89,23 +89,23 @@ const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onA
             onClose={() => setIsModalOpen(false)}
             onSubmit={handleAddContribution}
         />
-      <button onClick={onBack} className="flex items-center space-x-2 text-sm font-semibold text-primary-600 hover:text-primary-800 mb-6">
+      <button onClick={onBack} className="flex items-center space-x-2 text-sm font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 mb-6">
         <BackIcon className="w-5 h-5" />
         <span>Back to Experiments</span>
       </button>
 
-      <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-        <h2 className="text-3xl font-extrabold text-gray-900">{experiment.title}</h2>
-        <p className="mt-2 text-gray-600">{experiment.objective}</p>
+      <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 dark:bg-gray-900">
+        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">{experiment.title}</h2>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">{experiment.objective}</p>
         
         <div className="mt-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="border-b border-gray-200">
+            <div className="border-b border-gray-200 dark:border-gray-700">
                 <nav className="-mb-px flex space-x-4" aria-label="Tabs">
                     {TABS.map((tab) => (
                         <button
                             key={tab.name}
                             onClick={() => setActiveTab(tab.name)}
-                            className={`${activeTab === tab.name ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+                            className={`${activeTab === tab.name ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'} flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
                         >
                             <tab.icon className="w-5 h-5 mr-2" />
                             {tab.name}
@@ -123,12 +123,12 @@ const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onA
 
         <div className="mt-6">
             {activeTab === ContributionType.Viva && (
-                <div className="mb-4 p-4 bg-primary-50 border border-primary-200 rounded-lg flex items-center justify-between">
-                    <p className="text-sm text-primary-800">Stuck on what to prepare? Let AI help you!</p>
+                <div className="mb-4 p-4 bg-primary-50 border border-primary-200 rounded-lg flex items-center justify-between dark:bg-primary-950/50 dark:border-primary-900">
+                    <p className="text-sm text-primary-800 dark:text-primary-200">Stuck on what to prepare? Let AI help you!</p>
                     <button
                         onClick={handleGenerateViva}
                         disabled={isGenerating}
-                        className="flex items-center space-x-2 px-4 py-2 bg-white text-primary-600 border border-primary-300 font-semibold rounded-lg shadow-sm hover:bg-primary-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2 bg-white text-primary-600 border border-primary-300 font-semibold rounded-lg shadow-sm hover:bg-primary-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:bg-primary-800/50 dark:text-primary-200 dark:border-primary-700 dark:hover:bg-primary-800"
                     >
                         <SparklesIcon className="w-5 h-5" />
                         <span>{isGenerating ? 'Generating...' : 'Suggest Questions'}</span>
@@ -149,9 +149,9 @@ const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onA
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-16 px-6 bg-gray-50 rounded-lg">
-                    <h3 className="text-xl font-semibold text-gray-700">No Contributions Yet</h3>
-                    <p className="mt-2 text-gray-500">Be the first to share a {activeTab.toLowerCase()} for this experiment!</p>
+                <div className="text-center py-16 px-6 bg-gray-50 rounded-lg dark:bg-gray-800/50">
+                    <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300">No Contributions Yet</h3>
+                    <p className="mt-2 text-gray-500 dark:text-gray-400">Be the first to share a {activeTab.toLowerCase()} for this experiment!</p>
                 </div>
             )}
         </div>

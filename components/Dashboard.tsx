@@ -17,8 +17,8 @@ const Dashboard: React.FC<DashboardProps> = ({ subject, onSelectExperiment }) =>
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-extrabold text-gray-900">{subject.name}</h2>
-        <p className="mt-1 text-md text-gray-500">Subject Code: {subject.code}</p>
+        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">{subject.name}</h2>
+        <p className="mt-1 text-md text-gray-500 dark:text-gray-400">Subject Code: {subject.code}</p>
       </div>
       {subject.experiments.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -26,26 +26,26 @@ const Dashboard: React.FC<DashboardProps> = ({ subject, onSelectExperiment }) =>
             <div
               key={exp.id}
               onClick={() => onSelectExperiment(exp)}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer border border-gray-200"
+              className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer border border-gray-200 dark:bg-gray-900 dark:border-gray-800 dark:hover:border-primary-800"
             >
               <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center">
+                <div className="flex-shrink-0 w-12 h-12 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center dark:bg-primary-950/50 dark:text-primary-400">
                   <BeakerIcon className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-primary-600">Experiment {index + 1}</p>
-                  <h3 className="mt-1 text-lg font-bold text-gray-800">{exp.title}</h3>
-                  <p className="mt-2 text-sm text-gray-600 line-clamp-2">{exp.objective}</p>
+                  <p className="text-sm font-semibold text-primary-600 dark:text-primary-400">Experiment {index + 1}</p>
+                  <h3 className="mt-1 text-lg font-bold text-gray-800 dark:text-gray-200">{exp.title}</h3>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{exp.objective}</p>
                 </div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 px-6 bg-white rounded-lg shadow-md border border-gray-200">
-            <BeakerIcon className="w-12 h-12 mx-auto text-gray-400" />
-            <h3 className="mt-4 text-xl font-semibold text-gray-700">No Experiments Found</h3>
-            <p className="mt-2 text-gray-500">There are no experiments for this subject yet. An admin can add them from the Admin Panel.</p>
+        <div className="text-center py-16 px-6 bg-white rounded-lg shadow-md border border-gray-200 dark:bg-gray-900 dark:border-gray-800">
+            <BeakerIcon className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600" />
+            <h3 className="mt-4 text-xl font-semibold text-gray-700 dark:text-gray-300">No Experiments Found</h3>
+            <p className="mt-2 text-gray-500 dark:text-gray-400">There are no experiments for this subject yet. An admin can add them from the Admin Panel.</p>
         </div>
       )}
     </div>

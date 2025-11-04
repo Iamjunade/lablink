@@ -19,6 +19,22 @@ const App: React.FC = () => {
   const [adminViewActive, setAdminViewActive] = useState(false);
   const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
   const [isAdminAuthenticated, setAdminAuthenticated] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+  };
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [theme]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -195,18 +211,18 @@ const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-950">
         <div className="text-center">
             <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-primary-600 mx-auto"></div>
-            <h2 className="mt-4 text-xl font-semibold text-gray-700">Loading Lab Portal...</h2>
-            <p className="text-gray-500">Fetching the latest contributions.</p>
+            <h2 className="mt-4 text-xl font-semibold text-gray-700 dark:text-gray-300">Loading Lab Portal...</h2>
+            <p className="text-gray-500 dark:text-gray-400">Fetching the latest contributions.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-100 font-sans">
+    <div className="flex h-screen bg-gray-100 font-sans dark:bg-gray-950">
         <PasswordModal isOpen={isPasswordModalOpen} onClose={() => setPasswordModalOpen(false)} onSubmit={handlePasswordSubmit} />
         <Sidebar 
             departments={departments} 
@@ -221,8 +237,10 @@ const App: React.FC = () => {
             onToggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
             isAdmin={isAdmin || isAdminAuthenticated}
             onToggleAdminView={handleToggleAdminView}
+            theme={theme}
+            onToggleTheme={toggleTheme}
         />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-8">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-950 p-4 md:p-8">
             {adminViewActive && isAdminAuthenticated ? (
                 <AdminDashboard 
                     departments={departments}
@@ -244,8 +262,8 @@ const App: React.FC = () => {
             ) : (
                  <div className="flex items-center justify-center h-full">
                     <div className="text-center">
-                        <h2 className="text-2xl font-semibold text-gray-700">Welcome to LabLINK</h2>
-                        <p className="mt-2 text-gray-500">Please select a subject from the sidebar to view experiments.</p>
+                        <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">Welcome to LabLINK</h2>
+                        <p className="mt-2 text-gray-500 dark:text-gray-400">Please select a subject from the sidebar to view experiments.</p>
                     </div>
                  </div>
             )}
