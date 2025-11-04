@@ -1,0 +1,5 @@
+{
+  "name": "LabLINK - Collaborative Lab Portal",
+  "description": "A collaborative portal for students to share and discover resources for their lab experiments. Students can contribute code snippets, viva questions, theory, and diagrams, creating a comprehensive knowledge base for each lab subject.",
+  "requestFramePermissions": []
+}
