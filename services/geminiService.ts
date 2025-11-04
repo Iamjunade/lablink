@@ -1,19 +1,20 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { Contribution, ContributionType } from "../types";
 
 const API_KEY = process.env.API_KEY;
 
-if (!API_KEY) {
-  // In a real app, you'd show an error to the user.
-  // For this context, we'll log it and the app will have reduced functionality.
+let ai: GoogleGenAI | null = null;
+
+if (API_KEY) {
+  ai = new GoogleGenAI({ apiKey: API_KEY });
+} else {
   console.error("Gemini API key not found. AI features will be disabled.");
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY! });
-
 export const generateVivaQuestions = async (experimentTitle: string, experimentObjective: string): Promise<Contribution[]> => {
-  if (!API_KEY) return [];
+  if (!ai) {
+    return [];
+  }
 
   try {
     const prompt = `
@@ -49,4 +50,3 @@ export const generateVivaQuestions = async (experimentTitle: string, experimentO
     return [];
   }
 };
-   
