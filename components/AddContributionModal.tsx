@@ -45,8 +45,8 @@ const AddContributionModal: React.FC<AddContributionModalProps> = ({ isOpen, onC
                     <p className="text-sm text-gray-500 mt-1">Share your knowledge with the community.</p>
                 </div>
                 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-                    <div className="p-6 space-y-6">
+                <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+                    <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                         <div>
                             <label htmlFor="author" className="block text-sm font-medium text-gray-700">Your Name (Optional)</label>
                             <input
@@ -143,20 +143,18 @@ const AddContributionModal: React.FC<AddContributionModalProps> = ({ isOpen, onC
                         )}
 
                     </div>
+                    <div className="p-4 bg-gray-50 border-t flex justify-end space-x-3">
+                        <button type="button" onClick={onClose} className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Cancel
+                        </button>
+                        <button type="submit" className="px-4 py-2 bg-primary-600 text-white font-semibold rounded-lg shadow-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            Submit Contribution
+                        </button>
+                    </div>
                 </form>
-                
-                 <div className="p-4 bg-gray-50 border-t flex justify-end space-x-3">
-                    <button type="button" onClick={onClose} className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Cancel
-                    </button>
-                    <button type="submit" onClick={handleSubmit} className="px-4 py-2 bg-primary-600 text-white font-semibold rounded-lg shadow-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                        Submit Contribution
-                    </button>
-                </div>
             </div>
         </div>
     );
 };
 
 export default AddContributionModal;
-   

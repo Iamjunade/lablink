@@ -6,101 +6,6 @@ export const MOCK_DATA: Department[] = [
     name: 'Computer Science',
     subjects: [
       {
-        id: 'subj-ds',
-        name: 'Data Structures Lab',
-        code: 'CS301L',
-        experiments: [
-          {
-            id: 'exp-ds-1',
-            title: 'Implement a Stack using Arrays',
-            objective: 'To understand and implement the Last-In-First-Out (LIFO) behavior of a stack data structure using a static array.',
-            contributions: [
-              {
-                id: 'c1',
-                author: 'Jane Doe',
-                type: ContributionType.Code,
-                content: `
-#include <iostream>
-#define MAX_SIZE 101
-using namespace std;
-
-class Stack {
-private:
-    int A[MAX_SIZE];
-    int top;
-public:
-    Stack() {
-        top = -1;
-    }
-    void Push(int x) {
-        if (top == MAX_SIZE - 1) {
-            cout << "Error: stack overflow\\n";
-            return;
-        }
-        A[++top] = x;
-    }
-    void Pop() {
-        if (top == -1) {
-            cout << "Error: No element to pop\\n";
-            return;
-        }
-        top--;
-    }
-    int Top() {
-        return A[top];
-    }
-    int IsEmpty() {
-        return top == -1;
-    }
-};
-
-int main() {
-    Stack S;
-    S.Push(2);
-    S.Push(5);
-    S.Push(10);
-    S.Pop();
-    cout << S.Top();
-}`,
-                language: 'cpp',
-                upvotes: 15,
-                createdAt: new Date('2023-10-26T10:00:00Z'),
-              },
-              {
-                id: 'c2',
-                author: 'John Smith',
-                type: ContributionType.Viva,
-                question: 'What is stack overflow?',
-                content: 'Stack overflow is a situation that occurs when the stack pointer exceeds the stack bound. This typically happens when there are too many function calls (e.g., in deep recursion) or when trying to push an element onto a full stack in an array-based implementation.',
-                upvotes: 22,
-                createdAt: new Date('2023-10-26T11:20:00Z'),
-              },
-              {
-                id: 'c3',
-                author: 'Admin',
-                type: ContributionType.Diagram,
-                content: 'Stack Push & Pop Operation',
-                imageUrl: 'https://picsum.photos/seed/stack/600/400',
-                upvotes: 8,
-                createdAt: new Date('2023-10-25T15:00:00Z'),
-              }
-            ],
-          },
-          {
-            id: 'exp-ds-2',
-            title: 'Implement a Queue using Linked List',
-            objective: 'To implement the First-In-First-Out (FIFO) principle of a queue using a dynamic linked list.',
-            contributions: [],
-          },
-          {
-            id: 'exp-ds-3',
-            title: 'Binary Search Tree (BST) Implementation',
-            objective: 'To implement insertion, deletion, and traversal operations in a Binary Search Tree.',
-            contributions: [],
-          },
-        ],
-      },
-      {
         id: 'subj-dbms',
         name: 'Database Management Systems Lab',
         code: 'CS302L',
@@ -120,14 +25,44 @@ int main() {
         experiments: [
             {
                 id: 'exp-dv-1',
-                title: 'Introduction to Pandas for Data Manipulation',
-                objective: 'To learn the basics of data manipulation and cleaning using the Python Pandas library, including reading data, handling missing values, and filtering.',
+                title: 'Data Understanding and Preprocessing',
+                objective: 'Understand, find, explore, and clean up data. This includes handling formatting issues, outliers, duplicates, and performing normalization and standardization.',
                 contributions: [],
             },
             {
                 id: 'exp-dv-2',
-                title: 'Creating Basic Plots with Matplotlib',
-                objective: 'To visualize data by creating fundamental plots like line charts, bar charts, and scatter plots using the Matplotlib library in Python.',
+                title: 'Parsing PDF Files with Python',
+                objective: 'Develop a Python script to parse and extract data from PDF files using the pdfminer library.',
+                contributions: [],
+            },
+            {
+                id: 'exp-dv-3',
+                title: 'Data Cleanup on a Real-World Dataset',
+                objective: "Develop a Python script for data cleanup on the 'child labour and marriage data.xlsx' dataset. Focus on checking for duplicates and missing data, and cleaning line breaks, spaces, and special characters.",
+                contributions: [],
+            },
+            {
+                id: 'exp-dv-4',
+                title: 'Correlation Visualization with Matplotlib',
+                objective: 'Draw a chart to visualize the relationship between perceived corruption scores and child labour percentages using the Matplotlib library.',
+                contributions: [],
+            },
+            {
+                id: 'exp-dv-5',
+                title: 'Web Scraping for robots.txt',
+                objective: 'Write a Python script to download and display the content of the robots.txt file from en.wikipedia.org.',
+                contributions: [],
+            },
+            {
+                id: 'exp-dv-6',
+                title: 'Introduction to Tableau Visualizations',
+                objective: "Create a first visualization with Tableau software for various data file formats. Learn to create basic charts like line charts, bar charts, and tree maps using the 'Show Me' panel.",
+                contributions: [],
+            },
+            {
+                id: 'exp-dv-7',
+                title: 'Advanced Tableau Calculations and Formatting',
+                objective: 'Perform Tableau calculations like sum, average, and aggregate. Create custom calculations and fields. Explore advanced visualization formatting, tools, and menus for specific data calculations.',
                 contributions: [],
             }
         ],

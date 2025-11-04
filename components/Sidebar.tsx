@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Department, Subject } from '../types';
 
@@ -8,15 +7,16 @@ interface SidebarProps {
   onSelectSubject: (subject: Subject) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  onAdminAccess: () => void;
 }
 
 const ChevronDownIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="http://www.w3.org/2000/svg" strokeWidth={1.5} stroke="currentColor" {...props}>
     <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
   </svg>
 );
 
-const Sidebar: React.FC<SidebarProps> = ({ departments, selectedSubject, onSelectSubject, isOpen, setIsOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ departments, selectedSubject, onSelectSubject, isOpen, setIsOpen, onAdminAccess }) => {
   const [openDepartment, setOpenDepartment] = useState<string | null>(departments[0]?.id || null);
 
   const toggleDepartment = (deptId: string) => {
@@ -55,6 +55,15 @@ const Sidebar: React.FC<SidebarProps> = ({ departments, selectedSubject, onSelec
                 </div>
             ))}
         </nav>
+        <div className="p-4 border-t border-primary-900">
+            <button 
+                onClick={onAdminAccess}
+                className="block w-full text-center px-3 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow-sm hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                aria-label="Access admin panel"
+            >
+                Admin Access
+            </button>
+        </div>
     </div>
   );
 
@@ -79,4 +88,3 @@ const Sidebar: React.FC<SidebarProps> = ({ departments, selectedSubject, onSelec
 };
 
 export default Sidebar;
-   

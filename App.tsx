@@ -63,7 +63,7 @@ const App: React.FC = () => {
     if (selectedExperiment && selectedExperiment.id === experimentId) {
       setSelectedExperiment(prev => prev ? updateExperimentContributions(prev) : null);
     }
-  }, [departments, selectedExperiment]);
+  }, [selectedExperiment]);
 
   const handleDeleteContribution = useCallback((experimentId: string, contributionId: string) => {
     if (!isAdmin) return;
@@ -119,9 +119,45 @@ const App: React.FC = () => {
     setAdminViewActive(false); // Close admin panel after creating
   }, [isAdmin, selectedSubject]);
 
+  const handleDeleteExperiment = useCallback((subjectId: string, experimentId: string) => {
+    if (!isAdmin) return;
+    
+    setDepartments(prevDepts => prevDepts.map(dept => ({
+        ...dept,
+        subjects: dept.subjects.map(subj => {
+            if (subj.id === subjectId) {
+                if (selectedSubject?.id === subjectId) {
+                    setSelectedSubject(prevSubj => prevSubj ? { ...prevSubj, experiments: prevSubj.experiments.filter(exp => exp.id !== experimentId)} : null);
+                }
+                return {
+                    ...subj,
+                    experiments: subj.experiments.filter(exp => exp.id !== experimentId)
+                };
+            }
+            return subj;
+        })
+    })));
+  }, [isAdmin, selectedSubject]);
+
   const handleToggleAdminView = () => {
     setAdminViewActive(prev => !prev);
     setSelectedExperiment(null);
+  };
+
+  const handleAdminAccess = () => {
+    if (!isAdmin) {
+      setIsAdmin(true);
+    }
+    setAdminViewActive(true);
+    setSelectedExperiment(null);
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('admin') !== 'true') {
+      url.searchParams.set('admin', 'true');
+      window.history.pushState({}, '', url);
+    }
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
   };
 
 
@@ -133,6 +169,7 @@ const App: React.FC = () => {
         onSelectSubject={handleSelectSubject}
         isOpen={isSidebarOpen}
         setIsOpen={setSidebarOpen}
+        onAdminAccess={handleAdminAccess}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
@@ -146,6 +183,7 @@ const App: React.FC = () => {
             <AdminDashboard 
                 departments={departments}
                 onCreateExperiment={handleCreateExperiment}
+                onDeleteExperiment={handleDeleteExperiment}
                 onClose={() => setAdminViewActive(false)}
             />
            ) : selectedExperiment ? (
