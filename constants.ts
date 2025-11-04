@@ -6,19 +6,6 @@ export const MOCK_DATA: Department[] = [
     name: 'Computer Science',
     subjects: [
       {
-        id: 'subj-dbms',
-        name: 'Database Management Systems Lab',
-        code: 'CS302L',
-        experiments: [
-            {
-                id: 'exp-dbms-1',
-                title: 'SQL Queries for Data Retrieval',
-                objective: 'To learn and apply various SQL SELECT statements to retrieve data from a sample database.',
-                contributions: [],
-            }
-        ],
-      },
-      {
         id: 'subj-dv',
         name: 'Data Exploration and Visualization Lab',
         code: 'CS405L',

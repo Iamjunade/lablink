@@ -51,11 +51,11 @@ interface ExperimentViewProps {
   experiment: Experiment;
   onBack: () => void;
   onAddContribution: (experimentId: string, contribution: Contribution) => void;
-  isAdmin: boolean;
+  isAdminAuthenticated: boolean;
   onDeleteContribution: (experimentId: string, contributionId: string) => void;
 }
 
-const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onAddContribution, isAdmin, onDeleteContribution }) => {
+const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onAddContribution, isAdminAuthenticated, onDeleteContribution }) => {
   const TABS = [
     { name: ContributionType.Code, icon: CodeIcon },
     { name: ContributionType.Viva, icon: VivaIcon },
@@ -144,7 +144,7 @@ const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onA
 
             {filteredContributions.length > 0 ? (
                 <div className="space-y-6">
-                    {filteredContributions.map(c => <ContributionCard key={c.id} contribution={c} isAdmin={isAdmin} onDelete={() => onDeleteContribution(experiment.id, c.id)} />)}
+                    {filteredContributions.map(c => <ContributionCard key={c.id} contribution={c} isAdminAuthenticated={isAdminAuthenticated} onDelete={() => onDeleteContribution(experiment.id, c.id)} />)}
                 </div>
             ) : (
                 <div className="text-center py-16 px-6 bg-gray-50 rounded-lg">
@@ -158,7 +158,7 @@ const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onA
   );
 };
 
-const ContributionCard: React.FC<{ contribution: Contribution, isAdmin: boolean, onDelete: () => void }> = ({ contribution, isAdmin, onDelete }) => {
+const ContributionCard: React.FC<{ contribution: Contribution, isAdminAuthenticated: boolean, onDelete: () => void }> = ({ contribution, isAdminAuthenticated, onDelete }) => {
     return (
         <div className="bg-white border border-gray-200 rounded-lg p-5 transition-shadow hover:shadow-md">
             <div className="flex justify-between items-start">
@@ -179,7 +179,7 @@ const ContributionCard: React.FC<{ contribution: Contribution, isAdmin: boolean,
                         <UpvoteIcon className="w-4 h-4" />
                         <span>{contribution.upvotes}</span>
                     </button>
-                    {isAdmin && (
+                    {isAdminAuthenticated && (
                         <button 
                             onClick={onDelete}
                             className="p-2 -m-2 text-gray-400 hover:text-red-600 rounded-md transition-colors"
