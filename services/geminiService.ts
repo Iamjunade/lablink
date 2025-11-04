@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { Contribution, ContributionType } from "../types";
 
 const API_KEY = process.env.API_KEY;
@@ -21,14 +21,31 @@ export const generateVivaQuestions = async (experimentTitle: string, experimentO
       You are an expert computer science professor. For a lab experiment titled "${experimentTitle}" with the objective "${experimentObjective}", generate 5 insightful viva questions that a student should be prepared for.
       For each question, provide a concise and accurate answer.
       Format the output as a JSON array of objects, where each object has a "question" and "answer" property.
-      Example: [{"question": "What is a data structure?", "answer": "It is a way of organizing data."}]
     `;
     
+    // Fix: Use responseSchema to ensure the model returns structured JSON data, which is more robust.
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
-          responseMimeType: 'application/json'
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                question: {
+                  type: Type.STRING,
+                  description: "The viva question."
+                },
+                answer: {
+                  type: Type.STRING,
+                  description: "The concise and accurate answer to the question."
+                },
+              },
+              required: ["question", "answer"],
+            },
+          }
         }
     });
 

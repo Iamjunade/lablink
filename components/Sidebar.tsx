@@ -7,7 +7,6 @@ interface SidebarProps {
   onSelectSubject: (subject: Subject) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  onAdminAccess: () => void;
 }
 
 const ChevronDownIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -16,7 +15,7 @@ const ChevronDownIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
-const Sidebar: React.FC<SidebarProps> = ({ departments, selectedSubject, onSelectSubject, isOpen, setIsOpen, onAdminAccess }) => {
+const Sidebar: React.FC<SidebarProps> = ({ departments, selectedSubject, onSelectSubject, isOpen, setIsOpen }) => {
   const [openDepartment, setOpenDepartment] = useState<string | null>(departments[0]?.id || null);
 
   const toggleDepartment = (deptId: string) => {
@@ -55,15 +54,6 @@ const Sidebar: React.FC<SidebarProps> = ({ departments, selectedSubject, onSelec
                 </div>
             ))}
         </nav>
-        <div className="p-4 border-t border-primary-900">
-            <button 
-                onClick={onAdminAccess}
-                className="block w-full text-center px-3 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow-sm hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                aria-label="Access admin panel"
-            >
-                Admin Access
-            </button>
-        </div>
     </div>
   );
 

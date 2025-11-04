@@ -1,0 +1,161 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Contribution, ContributionType } from '../types';
+
+// Add Prism to the window object for TypeScript
+declare global {
+    interface Window {
+        Prism: {
+            highlightElement: (element: Element) => void;
+        };
+    }
+}
+
+const SparklesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+    </svg>
+);
+const TrashIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.124-2.028-2.124H9.028c-1.12 0-2.029.944-2.029 2.124v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+    </svg>
+);
+const UpvoteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+    </svg>
+);
+const CopyIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375v-3.375c0-.621-.504-1.125-1.125-1.125h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125h1.5a1.125 1.125 0 0 1 1.125 1.125v3.375m-6.375-10.375a1.125 1.125 0 0 0-1.125-1.125H6.75c-.621 0-1.125.504-1.125 1.125v9.75c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V15.75m-6.375-10.375a1.125 1.125 0 0 0-1.125-1.125H6.75" />
+    </svg>
+);
+
+
+const ContributionCard: React.FC<{
+    contribution: Contribution;
+    isAdminAuthenticated: boolean;
+    onDelete: () => void;
+    onUpvote: () => void;
+}> = ({ contribution, isAdminAuthenticated, onDelete, onUpvote }) => {
+    
+    const upvotedStorageKey = 'lablink_upvoted';
+    const [isUpvoted, setIsUpvoted] = useState(false);
+    const [copyStatus, setCopyStatus] = useState('Copy');
+    const codeRef = useRef<HTMLElement | null>(null);
+    
+    useEffect(() => {
+        try {
+            const upvotedItems = JSON.parse(localStorage.getItem(upvotedStorageKey) || '[]');
+            setIsUpvoted(upvotedItems.includes(contribution.id));
+        } catch (e) {
+            setIsUpvoted(false);
+        }
+    }, [contribution.id]);
+
+    useEffect(() => {
+        // When the card mounts or the contribution content changes, highlight the code.
+        if (contribution.type === ContributionType.Code && codeRef.current && window.Prism) {
+            window.Prism.highlightElement(codeRef.current);
+        }
+    }, [contribution]);
+
+    const handleUpvote = () => {
+        if (isUpvoted) return;
+
+        try {
+            const upvotedItems = JSON.parse(localStorage.getItem(upvotedStorageKey) || '[]');
+            upvotedItems.push(contribution.id);
+            localStorage.setItem(upvotedStorageKey, JSON.stringify(upvotedItems));
+            setIsUpvoted(true);
+            onUpvote();
+        } catch (e) {
+            console.error("Could not save upvote status.", e);
+        }
+    };
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(contribution.content).then(() => {
+            setCopyStatus('Copied!');
+            setTimeout(() => setCopyStatus('Copy'), 2000);
+        }, () => {
+            setCopyStatus('Failed!');
+            setTimeout(() => setCopyStatus('Copy'), 2000);
+        });
+    };
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-lg p-5 transition-shadow hover:shadow-md">
+            <div className="flex justify-between items-start">
+                <div>
+                    <div className="flex items-center space-x-3">
+                       <p className="text-sm font-semibold text-gray-800">{contribution.author}</p>
+                       {contribution.isAiGenerated && (
+                           <span className="flex items-center text-xs font-medium bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+                               <SparklesIcon className="w-3 h-3 mr-1" />
+                               AI Generated
+                           </span>
+                       )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">{new Date(contribution.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <button 
+                        onClick={handleUpvote}
+                        disabled={isUpvoted}
+                        className={`flex items-center space-x-2 text-sm font-medium p-2 -m-2 rounded-md transition-colors ${
+                            isUpvoted 
+                            ? 'text-primary-600 cursor-default' 
+                            : 'text-gray-500 hover:text-primary-600 hover:bg-primary-50'
+                        }`}
+                        aria-pressed={isUpvoted}
+                    >
+                        <UpvoteIcon className="w-4 h-4" />
+                        <span>{contribution.upvotes}</span>
+                    </button>
+                    {isAdminAuthenticated && (
+                        <button 
+                            onClick={onDelete}
+                            className="p-2 -m-2 text-gray-400 hover:text-red-600 rounded-md transition-colors"
+                            aria-label="Delete contribution"
+                        >
+                            <TrashIcon className="w-5 h-5" />
+                        </button>
+                    )}
+                </div>
+            </div>
+            <div className="mt-4">
+                {contribution.type === ContributionType.Code && (
+                    /* The `language-xxxx` class and the `prism-tomorrow` theme in index.html work together for highlighting. */
+                    <div className="bg-gray-900 rounded-md text-sm">
+                         <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700">
+                            <span className="text-xs font-semibold text-gray-400 uppercase">{contribution.language || 'Code'}</span>
+                            <button onClick={handleCopy} className="flex items-center space-x-1 text-xs text-gray-400 hover:text-white">
+                                <CopyIcon className="w-4 h-4" />
+                                <span>{copyStatus}</span>
+                            </button>
+                        </div>
+                        <pre className="p-4 overflow-x-auto"><code ref={codeRef} className={`language-${(contribution.language || 'javascript').toLowerCase()}`}>{contribution.content}</code></pre>
+                    </div>
+                )}
+                 {contribution.type === ContributionType.Viva && (
+                    <div className="space-y-2">
+                        <p className="font-semibold text-gray-800">{contribution.question}</p>
+                        <p className="text-gray-600">{contribution.content}</p>
+                    </div>
+                )}
+                {contribution.type === ContributionType.Theory && (
+                     <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{contribution.content}</p>
+                )}
+                {contribution.type === ContributionType.Diagram && (
+                    <div>
+                        <img src={contribution.imageUrl} alt={contribution.content} className="rounded-lg max-w-full h-auto border"/>
+                        <p className="text-center mt-2 text-sm text-gray-600 italic">{contribution.content}</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
+
+export default ContributionCard;

@@ -104,6 +104,36 @@ const App: React.FC = () => {
         setSelectedExperiment(prev => prev ? {...prev, contributions: prev.contributions.filter(c => c.id !== contributionId)} : null);
     }
   };
+
+  const handleUpvoteContribution = (experimentId: string, contributionId: string) => {
+    const newDepartments = departments.map(dept => ({
+        ...dept,
+        subjects: dept.subjects.map(subj => ({
+            ...subj,
+            experiments: subj.experiments.map(exp => {
+                if (exp.id === experimentId) {
+                    return {
+                        ...exp,
+                        contributions: exp.contributions.map(c => 
+                            c.id === contributionId ? { ...c, upvotes: c.upvotes + 1 } : c
+                        ),
+                    };
+                }
+                return exp;
+            }),
+        })),
+    }));
+    updateAndSaveData(newDepartments);
+    // Update the selected experiment in state to see the change immediately
+    if (selectedExperiment?.id === experimentId) {
+        setSelectedExperiment(prev => prev ? {
+            ...prev,
+            contributions: prev.contributions.map(c =>
+                c.id === contributionId ? { ...c, upvotes: c.upvotes + 1 } : c
+            )
+        } : null);
+    }
+  };
   
   const handleCreateExperiment = (subjectId: string, newExperimentData: Omit<Experiment, 'id' | 'contributions'>) => {
     const newExperiment: Experiment = {
@@ -138,10 +168,6 @@ const App: React.FC = () => {
     if(selectedExperiment?.id === experimentId) {
         setSelectedExperiment(null);
     }
-  };
-  
-  const handleAdminAccess = () => {
-    setPasswordModalOpen(true);
   };
   
   const handlePasswordSubmit = (password: string) => {
@@ -188,7 +214,6 @@ const App: React.FC = () => {
             onSelectSubject={handleSelectSubject} 
             isOpen={isSidebarOpen}
             setIsOpen={setSidebarOpen}
-            onAdminAccess={handleAdminAccess}
         />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
@@ -214,6 +239,7 @@ const App: React.FC = () => {
                     onAddContribution={handleAddContribution}
                     isAdminAuthenticated={isAdminAuthenticated}
                     onDeleteContribution={handleDeleteContribution}
+                    onUpvoteContribution={handleUpvoteContribution}
                 />
             ) : (
                  <div className="flex items-center justify-center h-full">
