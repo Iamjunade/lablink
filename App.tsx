@@ -9,8 +9,40 @@ import ExperimentView from './components/ExperimentView';
 import AdminDashboard from './components/AdminDashboard';
 import PasswordModal from './components/PasswordModal';
 
+const LABLINK_DATA_KEY = 'lablink_data';
+
+// Helper to restore Date objects from JSON, since they are stored as strings
+const reviveDates = (departments: Department[]): Department[] => {
+  return departments.map(dept => ({
+    ...dept,
+    subjects: dept.subjects.map(subj => ({
+      ...subj,
+      experiments: subj.experiments.map(exp => ({
+        ...exp,
+        contributions: exp.contributions.map(c => ({
+          ...c,
+          createdAt: new Date(c.createdAt)
+        }))
+      }))
+    }))
+  }));
+};
+
+
 const App: React.FC = () => {
-  const [departments, setDepartments] = useState<Department[]>(MOCK_DATA);
+  const [departments, setDepartments] = useState<Department[]>(() => {
+    try {
+      const savedData = localStorage.getItem(LABLINK_DATA_KEY);
+      if (savedData) {
+        return reviveDates(JSON.parse(savedData));
+      }
+      return MOCK_DATA;
+    } catch (error) {
+      console.error("Could not load data from local storage", error);
+      return MOCK_DATA;
+    }
+  });
+  
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(departments[0] || null);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(selectedDepartment?.subjects[0] || null);
   const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null);
@@ -26,6 +58,15 @@ const App: React.FC = () => {
       setIsAdmin(true);
     }
   }, []);
+
+  // Persist data to localStorage whenever departments change
+  useEffect(() => {
+    try {
+      localStorage.setItem(LABLINK_DATA_KEY, JSON.stringify(departments));
+    } catch (error) {
+      console.error("Could not save data to local storage", error);
+    }
+  }, [departments]);
 
   const handleSelectSubject = (subject: Subject) => {
     setSelectedSubject(subject);
