@@ -90,8 +90,8 @@ export const getData = async (): Promise<Department[]> => {
         const csDept = remoteData.find((d) => d.id === 'dept-cs');
         const dvLab = csDept?.subjects.find((s) => s.id === 'subj-dv');
         
-        if (!dvLab || dvLab.experiments.length < 12) {
-            console.warn("Backend data is outdated. Using up-to-date local data instead.");
+        if (!dvLab || dvLab.experiments.length < 12 || !dvLab.driveLink || !dvLab.githubLink) {
+            console.warn("Backend data is outdated or missing required fields. Using up-to-date local data instead.");
             return MOCK_DATA;
         }
 
