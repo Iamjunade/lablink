@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard';
 import ExperimentView from './components/ExperimentView';
 import AdminDashboard from './components/AdminDashboard';
 import PasswordModal from './components/PasswordModal';
+import SearchResultsView, { SearchResult } from './components/SearchResultsView';
 
 const App: React.FC = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -20,6 +21,8 @@ const App: React.FC = () => {
   const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
   const [isAdminAuthenticated, setAdminAuthenticated] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -69,6 +72,43 @@ const App: React.FC = () => {
     };
     fetchInitialData();
   }, []);
+
+    // Perform search when searchQuery changes
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            setSearchResults([]);
+            return;
+        }
+
+        const results: SearchResult[] = [];
+        const lowerCaseQuery = searchQuery.toLowerCase();
+
+        departments.forEach(dept => {
+            dept.subjects.forEach(subj => {
+                subj.experiments.forEach(exp => {
+                    const experimentTitleMatch = exp.title.toLowerCase().includes(lowerCaseQuery);
+
+                    exp.contributions.forEach(contrib => {
+                        const contentMatch = contrib.content.toLowerCase().includes(lowerCaseQuery);
+                        const questionMatch = contrib.question?.toLowerCase().includes(lowerCaseQuery);
+                        const authorMatch = contrib.author.toLowerCase().includes(lowerCaseQuery);
+
+                        if (contentMatch || questionMatch || authorMatch || experimentTitleMatch) {
+                            if (!results.some(r => r.contribution.id === contrib.id)) {
+                                results.push({
+                                    contribution: contrib,
+                                    experiment: { id: exp.id, title: exp.title },
+                                    subject: { id: subj.id, name: subj.name },
+                                    department: { name: dept.name },
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+        });
+        setSearchResults(results);
+    }, [searchQuery, departments]);
   
   // Helper function to update state and persist data
   const updateAndSaveData = (newDepartments: Department[]) => {
@@ -205,6 +245,26 @@ const App: React.FC = () => {
     }
   };
 
+  const handleSearchResultClick = (result: SearchResult) => {
+    let subjectToSelect: Subject | null = null;
+    let experimentToSelect: Experiment | null = null;
+
+    for (const dept of departments) {
+        const foundSubject = dept.subjects.find(s => s.id === result.subject.id);
+        if (foundSubject) {
+            subjectToSelect = foundSubject;
+            experimentToSelect = foundSubject.experiments.find(e => e.id === result.experiment.id) || null;
+            break;
+        }
+    }
+
+    if (subjectToSelect && experimentToSelect) {
+        handleSelectSubject(subjectToSelect);
+        setSelectedExperimentId(experimentToSelect.id);
+        setSearchQuery('');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-950">
@@ -216,6 +276,45 @@ const App: React.FC = () => {
       </div>
     );
   }
+
+  const renderContent = () => {
+    if (searchQuery.trim().length > 0) {
+        return <SearchResultsView 
+                    query={searchQuery} 
+                    results={searchResults} 
+                    onResultClick={handleSearchResultClick} 
+                />;
+    }
+    if (adminViewActive && isAdminAuthenticated) {
+        return <AdminDashboard 
+                    departments={departments}
+                    onCreateExperiment={handleCreateExperiment}
+                    onDeleteExperiment={handleDeleteExperiment}
+                    onClose={() => setAdminViewActive(false)}
+                />;
+    }
+    if (selectedSubject && !selectedExperiment) {
+        return <Dashboard subject={selectedSubject} onSelectExperiment={handleSelectExperiment} />;
+    }
+    if (selectedExperiment) {
+        return <ExperimentView 
+                    experiment={selectedExperiment} 
+                    onBack={handleBackToDashboard} 
+                    onAddContribution={handleAddContribution}
+                    isAdminAuthenticated={isAdminAuthenticated}
+                    onDeleteContribution={handleDeleteContribution}
+                    onUpvoteContribution={handleUpvoteContribution}
+                />;
+    }
+    return (
+        <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+                <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">Welcome to LabLINK</h2>
+                <p className="mt-2 text-gray-500 dark:text-gray-400">Please select a subject from the sidebar to view experiments.</p>
+            </div>
+        </div>
+    );
+  };
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans dark:bg-gray-950">
@@ -235,34 +334,11 @@ const App: React.FC = () => {
             onToggleAdminView={handleToggleAdminView}
             theme={theme}
             onToggleTheme={toggleTheme}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
         />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-950 p-4 md:p-8">
-            {adminViewActive && isAdminAuthenticated ? (
-                <AdminDashboard 
-                    departments={departments}
-                    onCreateExperiment={handleCreateExperiment}
-                    onDeleteExperiment={handleDeleteExperiment}
-                    onClose={() => setAdminViewActive(false)}
-                />
-            ) : selectedSubject && !selectedExperiment ? (
-                <Dashboard subject={selectedSubject} onSelectExperiment={handleSelectExperiment} />
-            ) : selectedExperiment ? (
-                <ExperimentView 
-                    experiment={selectedExperiment} 
-                    onBack={handleBackToDashboard} 
-                    onAddContribution={handleAddContribution}
-                    isAdminAuthenticated={isAdminAuthenticated}
-                    onDeleteContribution={handleDeleteContribution}
-                    onUpvoteContribution={handleUpvoteContribution}
-                />
-            ) : (
-                 <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                        <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">Welcome to LabLINK</h2>
-                        <p className="mt-2 text-gray-500 dark:text-gray-400">Please select a subject from the sidebar to view experiments.</p>
-                    </div>
-                 </div>
-            )}
+            {renderContent()}
         </main>
       </div>
     </div>

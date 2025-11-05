@@ -7,6 +7,8 @@ interface HeaderProps {
   onToggleAdminView: () => void;
   theme: string;
   onToggleTheme: () => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
 const MenuIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -33,8 +35,20 @@ const SunIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     </svg>
 );
 
+const SearchIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+    </svg>
+);
 
-const Header: React.FC<HeaderProps> = ({ subjectName, onToggleSidebar, isAdmin, onToggleAdminView, theme, onToggleTheme }) => {
+const XCircleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+  );
+
+
+const Header: React.FC<HeaderProps> = ({ subjectName, onToggleSidebar, isAdmin, onToggleAdminView, theme, onToggleTheme, searchQuery, onSearchChange }) => {
   return (
     <header className="flex-shrink-0 bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
       <div className="flex items-center justify-between p-4 h-16">
@@ -42,17 +56,42 @@ const Header: React.FC<HeaderProps> = ({ subjectName, onToggleSidebar, isAdmin, 
           <button onClick={onToggleSidebar} className="text-gray-500 md:hidden mr-4 dark:text-gray-400">
              <MenuIcon className="h-6 w-6" />
           </button>
-          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">{subjectName}</h1>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 hidden sm:block">{subjectName}</h1>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex-1 flex justify-center px-4">
+            <div className="relative w-full max-w-lg">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <SearchIcon className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                    type="search"
+                    name="search"
+                    id="search"
+                    value={searchQuery}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
+                    placeholder="Search contributions, experiments..."
+                />
+                 {searchQuery && (
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <button onClick={() => onSearchChange('')} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <XCircleIcon className="h-5 w-5" />
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+
+        <div className="flex items-center space-x-2 sm:space-x-4">
             {isAdmin && (
                 <button
                     onClick={onToggleAdminView}
                     className="px-3 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow-sm hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     aria-label="Toggle Admin Panel"
                 >
-                    Admin Panel
+                   <span className="hidden sm:inline">Admin Panel</span>
+                   <span className="sm:hidden">Admin</span>
                 </button>
             )}
             <button
