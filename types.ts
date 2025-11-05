@@ -31,6 +31,7 @@ export interface Subject {
   name: string;
   code: string;
   experiments: Experiment[];
+  driveLink?: string;
 }
 
 export interface Department {
@@ -38,4 +39,3 @@ export interface Department {
   name: string;
   subjects: Subject[];
 }
-   

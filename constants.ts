@@ -9,6 +9,7 @@ export const MOCK_DATA: Department[] = [
         id: 'subj-dv',
         name: 'Data Exploration and Visualization Lab',
         code: 'CS405L',
+        driveLink: 'https://drive.google.com/drive/u/0/folders/1L2X0y_i-gY8F-wJ9_vK0_zD7_A6bC5dE',
         experiments: [
             {
                 id: 'exp-dv-1',
@@ -50,6 +51,36 @@ export const MOCK_DATA: Department[] = [
                 id: 'exp-dv-7',
                 title: 'Advanced Tableau Calculations and Formatting',
                 objective: 'Perform Tableau calculations like sum, average, and aggregate. Create custom calculations and fields. Explore advanced visualization formatting, tools, and menus for specific data calculations.',
+                contributions: [],
+            },
+            {
+                id: 'exp-dv-8',
+                title: 'Editing, Formatting, and Pivoting Data in Tableau',
+                objective: 'Learn to edit and format axes, manipulate data within Tableau, and utilize pivoting functionality for data transformation.',
+                contributions: [],
+            },
+            {
+                id: 'exp-dv-9',
+                title: 'Data Structuring and Filtering in Tableau',
+                objective: 'Master the techniques for structuring, sorting, filtering, and pivoting data to prepare it for effective visualization in Tableau.',
+                contributions: [],
+            },
+            {
+                id: 'exp-dv-10',
+                title: 'Advanced Visualization Tools in Tableau',
+                objective: 'Explore advanced visualization tools, including using filters, detail panels, size panels, customizing filters with tooltips, and applying color formatting to data.',
+                contributions: [],
+            },
+            {
+                id: 'exp-dv-11',
+                title: 'Dashboards and Storytelling in Tableau',
+                objective: 'Learn to create and design different interactive displays, and how to distribute and publish data using Tableau dashboards and storytelling features.',
+                contributions: [],
+            },
+            {
+                id: 'exp-dv-12',
+                title: 'Creating Custom and Advanced Charts in Tableau',
+                objective: 'Develop skills in creating custom charts, working with cyclical data, and implementing circular area charts and dual-axis charts for complex data representation.',
                 contributions: [],
             }
         ],

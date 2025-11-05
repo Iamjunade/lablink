@@ -69,49 +69,37 @@ export const getData = async (): Promise<Department[]> => {
 
         if (!response.ok) {
             if (response.status === 404) {
-                 console.error("JSONBin not found. Bin ID may be incorrect. Falling back to mock data.");
-                 return MOCK_DATA;
-            }
-             if (response.status === 401) {
-                 console.error("JSONBin authentication failed. API Key may be incorrect. Falling back to mock data.");
-                 return MOCK_DATA;
+                 console.warn("JSONBin not found. Falling back to local data.");
+            } else if (response.status === 401) {
+                 console.warn("JSONBin authentication failed. Falling back to local data.");
             }
             throw new Error(`Failed to fetch data: ${response.statusText}`);
         }
         
         const data = await response.json();
         
-        // Stricter Validation: Check for the exact expected format { record: [...] } with content.
-        const isValidData = data &&
-            typeof data === 'object' &&
-            !Array.isArray(data) &&
-            data.record &&
-            Array.isArray(data.record) &&
-            data.record.length > 0;
+        // Basic validation for structure
+        if (!data?.record || !Array.isArray(data.record) || data.record.length === 0) {
+            console.warn("Backend data is empty or malformed. Falling back to local data.");
+            return MOCK_DATA;
+        }
+        
+        const remoteData: Department[] = data.record;
 
-
-        if (isValidData) {
-            // Happy path: Data is valid.
-            console.log("Successfully fetched and validated data from backend.");
-            return parseDates(data.record);
-        } else {
-            // Self-healing: Data is invalid for any other reason. Restore from default.
-            console.error(
-                "Backend data is empty, malformed, or not in the expected { record: [...] } format. Restoring from default data. Received:",
-                JSON.stringify(data, null, 2) // Log the problematic data structure
-            );
-            try {
-                await performSave(MOCK_DATA);
-                console.log("Backend data successfully restored.");
-            } catch (saveError) {
-                console.error("Failed to restore backend data:", saveError);
-            }
-            // Return the fresh mock data for the current session.
+        // Check if content is outdated
+        const csDept = remoteData.find((d) => d.id === 'dept-cs');
+        const dvLab = csDept?.subjects.find((s) => s.id === 'subj-dv');
+        
+        if (!dvLab || dvLab.experiments.length < 12) {
+            console.warn("Backend data is outdated. Using up-to-date local data instead.");
             return MOCK_DATA;
         }
 
+        console.log("Successfully fetched and validated data from backend.");
+        return parseDates(remoteData);
+
     } catch (error) {
-        console.error('Error fetching/parsing data from backend, falling back to mock data:', error);
+        console.warn('Could not fetch data from backend, falling back to local mock data:', (error as Error).message);
         return MOCK_DATA;
     }
 };
