@@ -221,6 +221,56 @@ const App: React.FC = () => {
         setSelectedExperimentId(null);
     }
   };
+
+  const handleCreateDepartment = (name: string) => {
+    const newDepartment: Department = {
+      id: `dept-${Date.now()}`,
+      name,
+      subjects: [],
+    };
+    updateAndSaveData([...departments, newDepartment]);
+  };
+
+  const handleDeleteDepartment = (departmentId: string) => {
+    const newDepartments = departments.filter(d => d.id !== departmentId);
+    // If we deleted the currently selected department, reset selection
+    if (selectedDepartment?.id === departmentId) {
+        const firstDept = newDepartments[0] || null;
+        setSelectedDepartment(firstDept);
+        setSelectedSubject(firstDept?.subjects[0] || null);
+    }
+    updateAndSaveData(newDepartments);
+  };
+
+  const handleCreateSubject = (departmentId: string, subjectData: Omit<Subject, 'id' | 'experiments'>) => {
+    const newSubject: Subject = {
+      ...subjectData,
+      id: `subj-${Date.now()}`,
+      experiments: [],
+    };
+    const newDepartments = departments.map(dept => {
+      if (dept.id === departmentId) {
+        return { ...dept, subjects: [...dept.subjects, newSubject] };
+      }
+      return dept;
+    });
+    updateAndSaveData(newDepartments);
+  };
+
+  const handleDeleteSubject = (departmentId: string, subjectId: string) => {
+    const newDepartments = departments.map(dept => {
+      if (dept.id === departmentId) {
+        const updatedSubjects = dept.subjects.filter(s => s.id !== subjectId);
+        // If we deleted the currently selected subject, deselect it
+        if (selectedSubject?.id === subjectId) {
+            setSelectedSubject(null);
+        }
+        return { ...dept, subjects: updatedSubjects };
+      }
+      return dept;
+    });
+    updateAndSaveData(newDepartments);
+  };
   
   const handlePasswordSubmit = (password: string) => {
     // In a real app, this would be a secure check.
@@ -290,6 +340,10 @@ const App: React.FC = () => {
                     departments={departments}
                     onCreateExperiment={handleCreateExperiment}
                     onDeleteExperiment={handleDeleteExperiment}
+                    onCreateDepartment={handleCreateDepartment}
+                    onDeleteDepartment={handleDeleteDepartment}
+                    onCreateSubject={handleCreateSubject}
+                    onDeleteSubject={handleDeleteSubject}
                     onClose={() => setAdminViewActive(false)}
                 />;
     }
