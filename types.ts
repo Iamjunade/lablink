@@ -32,6 +32,7 @@ export interface Subject {
   code: string;
   experiments: Experiment[];
   driveLink?: string;
+  githubLink?: string;
 }
 
 export interface Department {

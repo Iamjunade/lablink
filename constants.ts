@@ -10,6 +10,7 @@ export const MOCK_DATA: Department[] = [
         name: 'Data Exploration and Visualization Lab',
         code: 'CS405L',
         driveLink: 'https://drive.google.com/drive/u/0/folders/1L2X0y_i-gY8F-wJ9_vK0_zD7_A6bC5dE',
+        githubLink: 'https://github.com/Mahi-Repalle?page=2&tab=repositories',
         experiments: [
             {
                 id: 'exp-dv-1',
