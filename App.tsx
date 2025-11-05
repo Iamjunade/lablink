@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Department, Subject, Experiment, Contribution } from './types';
 import { getData, saveData } from './services/dataService';
 import Sidebar from './components/Sidebar';
@@ -13,7 +13,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null);
+  const [selectedExperimentId, setSelectedExperimentId] = useState<string | null>(null);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminViewActive, setAdminViewActive] = useState(false);
@@ -42,6 +42,19 @@ const App: React.FC = () => {
       setIsAdmin(true);
     }
   }, []);
+  
+  // Derive the selected experiment object from the ID and the main departments array.
+  // This ensures the displayed data is always in sync with the source of truth.
+  const selectedExperiment = useMemo(() => {
+    if (!selectedExperimentId) return null;
+    for (const dept of departments) {
+      for (const subj of dept.subjects) {
+        const exp = subj.experiments.find(e => e.id === selectedExperimentId);
+        if (exp) return exp;
+      }
+    }
+    return null;
+  }, [departments, selectedExperimentId]);
 
   // Fetch initial data from the backend service
   useEffect(() => {
@@ -67,18 +80,18 @@ const App: React.FC = () => {
     const parentDept = departments.find(dept => dept.subjects.some(s => s.id === subject.id)) || null;
     setSelectedDepartment(parentDept);
     setSelectedSubject(subject);
-    setSelectedExperiment(null);
+    setSelectedExperimentId(null);
     setAdminViewActive(false);
     setSidebarOpen(false); // Close sidebar on selection (mobile)
   }, [departments]);
   
   const handleSelectExperiment = (experiment: Experiment) => {
-    setSelectedExperiment(experiment);
+    setSelectedExperimentId(experiment.id);
     setAdminViewActive(false);
   };
   
   const handleBackToDashboard = () => {
-    setSelectedExperiment(null);
+    setSelectedExperimentId(null);
   };
 
   const handleAddContribution = (experimentId: string, contribution: Contribution) => {
@@ -95,10 +108,6 @@ const App: React.FC = () => {
       })),
     }));
     updateAndSaveData(newDepartments);
-    // Also update the selected experiment in state to see the change immediately
-     if (selectedExperiment?.id === experimentId) {
-        setSelectedExperiment(prev => prev ? {...prev, contributions: [...prev.contributions, contribution]} : null);
-    }
   };
   
   const handleDeleteContribution = (experimentId: string, contributionId: string) => {
@@ -115,10 +124,6 @@ const App: React.FC = () => {
       })),
     }));
     updateAndSaveData(newDepartments);
-     // Also update the selected experiment in state to see the change immediately
-    if (selectedExperiment?.id === experimentId) {
-        setSelectedExperiment(prev => prev ? {...prev, contributions: prev.contributions.filter(c => c.id !== contributionId)} : null);
-    }
   };
 
   const handleUpvoteContribution = (experimentId: string, contributionId: string) => {
@@ -140,15 +145,6 @@ const App: React.FC = () => {
         })),
     }));
     updateAndSaveData(newDepartments);
-    // Update the selected experiment in state to see the change immediately
-    if (selectedExperiment?.id === experimentId) {
-        setSelectedExperiment(prev => prev ? {
-            ...prev,
-            contributions: prev.contributions.map(c =>
-                c.id === contributionId ? { ...c, upvotes: c.upvotes + 1 } : c
-            )
-        } : null);
-    }
   };
   
   const handleCreateExperiment = (subjectId: string, newExperimentData: Omit<Experiment, 'id' | 'contributions'>) => {
@@ -181,8 +177,8 @@ const App: React.FC = () => {
     }));
     updateAndSaveData(newDepartments);
     // If the deleted experiment was the selected one, go back to dashboard
-    if(selectedExperiment?.id === experimentId) {
-        setSelectedExperiment(null);
+    if(selectedExperimentId === experimentId) {
+        setSelectedExperimentId(null);
     }
   };
   
@@ -192,7 +188,7 @@ const App: React.FC = () => {
         setAdminAuthenticated(true);
         setPasswordModalOpen(false);
         setAdminViewActive(true);
-        setSelectedExperiment(null); // Exit experiment view if open
+        setSelectedExperimentId(null); // Exit experiment view if open
         return true;
     }
     return false;
@@ -204,7 +200,7 @@ const App: React.FC = () => {
     } else {
         setAdminViewActive(prev => !prev);
         if(!adminViewActive) { // If we are opening it
-             setSelectedExperiment(null);
+             setSelectedExperimentId(null);
         }
     }
   };
