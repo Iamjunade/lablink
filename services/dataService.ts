@@ -1,9 +1,9 @@
 import { Department } from '../types';
 import { MOCK_DATA } from '../constants';
+import { supabase } from './supabaseClient';
 
-const JSONBIN_API_KEY = '$2a$10$NITf03hkADNuaYku6mKMKurdhZeaSL6Eqxc9HinKo4pZ3e5iQZEO.';
-const JSONBIN_BIN_ID = '690a38dd43b1c97be998af1d';
-const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+const TABLE_NAME = 'lab_data';
+const ROW_ID = 'main_data'; // The single row ID to store our JSON blob
 
 // Utility to debounce function calls
 const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
@@ -43,63 +43,57 @@ const parseDates = (obj: any): any => {
 
 const performSave = async (data: Department[]): Promise<void> => {
     try {
-        const response = await fetch(JSONBIN_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': JSONBIN_API_KEY,
-            },
-            body: JSON.stringify(data),
-        });
+        // Upsert ensures the row is created if it doesn't exist, or updated if it does.
+        const { error } = await supabase
+            .from(TABLE_NAME)
+            .upsert({ id: ROW_ID, data: data });
 
-        if (!response.ok) {
-            throw new Error(`Failed to save data: ${response.statusText}`);
+        if (error) {
+            throw error;
         }
-        console.log('Data saved successfully to the backend.');
+        console.log('Data saved successfully to Supabase.');
     } catch (error) {
-        console.error('Error saving data to backend:', error);
+        console.error('Error saving data to Supabase:', error);
     }
 };
 
 export const getData = async (): Promise<Department[]> => {
     try {
-        const response = await fetch(`${JSONBIN_URL}/latest`, {
-            headers: { 'X-Master-Key': JSONBIN_API_KEY },
-        });
+        const { data, error } = await supabase
+            .from(TABLE_NAME)
+            .select('data')
+            .eq('id', ROW_ID)
+            .maybeSingle(); // Use maybeSingle to avoid an error if no rows are found.
 
-        if (!response.ok) {
-            if (response.status === 404) {
-                 console.warn("JSONBin not found. Falling back to local data.");
-            } else if (response.status === 401) {
-                 console.warn("JSONBin authentication failed. Falling back to local data.");
-            }
-            throw new Error(`Failed to fetch data: ${response.statusText}`);
+        if (error) {
+            throw error;
+        }
+
+        // If data is null or malformed, it means no data in DB or it's corrupted.
+        if (!data || !data.data || !Array.isArray(data.data) || data.data.length === 0) {
+             console.warn("Supabase data not found or is malformed. Falling back to local MOCK_DATA.");
+             // Try to save the mock data to initialize the DB for the next load.
+             saveData(MOCK_DATA);
+             return MOCK_DATA;
         }
         
-        const data = await response.json();
-        
-        // Basic validation for structure
-        if (!data?.record || !Array.isArray(data.record) || data.record.length === 0) {
-            console.warn("Backend data is empty or malformed. Falling back to local data.");
-            return MOCK_DATA;
-        }
-        
-        const remoteData: Department[] = data.record;
+        const remoteData: Department[] = data.data;
 
-        // Check if content is outdated
+        // Check if content is outdated (using a heuristic from previous implementation)
         const csDept = remoteData.find((d) => d.id === 'dept-cs');
         const dvLab = csDept?.subjects.find((s) => s.id === 'subj-dv');
         
         if (!dvLab || dvLab.experiments.length < 12 || !dvLab.driveLink || !dvLab.githubLink) {
-            console.warn("Backend data is outdated or missing required fields. Using up-to-date local data instead.");
+            console.warn("Supabase data is outdated or missing required fields. Using up-to-date local data and saving it.");
+            saveData(MOCK_DATA); // Overwrite outdated remote data
             return MOCK_DATA;
         }
 
-        console.log("Successfully fetched and validated data from backend.");
+        console.log("Successfully fetched and validated data from Supabase.");
         return parseDates(remoteData);
 
     } catch (error) {
-        console.warn('Could not fetch data from backend, falling back to local mock data:', (error as Error).message);
+        console.error('Could not fetch data from Supabase, falling back to local mock data:', (error as Error).message);
         return MOCK_DATA;
     }
 };
