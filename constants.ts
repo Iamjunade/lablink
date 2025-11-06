@@ -97,73 +97,228 @@ export const MOCK_DATA: Department[] = [
             id: 'exp-ad-1',
             title: 'Android Studio Setup & Basic Intents',
             objective: 'Install Android Studio, set up an Android Virtual Device (AVD), and develop an app with menu options to dial a number, open a website, and send an SMS using intents.',
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-1',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'This example demonstrates how to use Intents to perform common actions like dialing a number, opening a website, and sending an SMS from an Android app.',
+                codeSnippets: [
+                  { language: 'xml', code: `<!-- activity_main.xml -->\n<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"\n    xmlns:tools="http://schemas.android.com/tools"\n    android:layout_width="match_parent"\n    android:layout_height="match_parent"\n    android:orientation="vertical"\n    android:padding="16dp"\n    android:gravity="center">\n\n    <Button\n        android:id="@+id/btnDial"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:text="Dial Number" />\n\n    <Button\n        android:id="@+id/btnWebsite"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:text="Open Website" />\n\n    <Button\n        android:id="@+id/btnSms"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:text="Send SMS" />\n\n</LinearLayout>` },
+                  { language: 'java', code: `// MainActivity.java\npackage com.example.intentsdemo;\n\nimport android.content.Intent;\nimport android.net.Uri;\nimport android.os.Bundle;\nimport android.view.View;\nimport android.widget.Button;\nimport androidx.appcompat.app.AppCompatActivity;\n\npublic class MainActivity extends AppCompatActivity {\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n\n        Button btnDial = findViewById(R.id.btnDial);\n        Button btnWebsite = findViewById(R.id.btnWebsite);\n        Button btnSms = findViewById(R.id.btnSms);\n\n        btnDial.setOnClickListener(v -> {\n            Intent dialIntent = new Intent(Intent.ACTION_DIAL);\n            dialIntent.setData(Uri.parse("tel:1234567890"));\n            startActivity(dialIntent);\n        });\n\n        btnWebsite.setOnClickListener(v -> {\n            Intent webIntent = new Intent(Intent.ACTION_VIEW);\n            webIntent.setData(Uri.parse("http://www.google.com"));\n            startActivity(webIntent);\n        });\n\n        btnSms.setOnClickListener(v -> {\n            Intent smsIntent = new Intent(Intent.ACTION_VIEW);\n            smsIntent.setData(Uri.parse("sms:"));\n            smsIntent.putExtra("sms_body", "Hello from my Android App!");\n            startActivity(smsIntent);\n        });\n    }\n}` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-2',
             title: 'Android Notifications and Toasts',
             objective: 'Develop a mobile app to insert notifications. On successful insertion, display a toast message to the user.',
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-2',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'This code shows how to create a basic notification and a Toast message when a button is clicked. You need to create a notification channel for Android Oreo (API 26) and above.',
+                codeSnippets: [
+                  { language: 'xml', code: `<!-- activity_main.xml -->\n<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"\n    android:layout_width="match_parent"\n    android:layout_height="match_parent"\n    android:padding="16dp">\n\n    <Button\n        android:id="@+id/btnNotify"\n        android:layout_width="wrap_content"\n        android:layout_height="wrap_content"\n        android:text="Show Notification & Toast"\n        android:layout_centerInParent="true"/>\n\n</RelativeLayout>` },
+                  { language: 'java', code: `// MainActivity.java\npackage com.example.notificationdemo;\n\nimport android.app.NotificationChannel;\nimport android.app.NotificationManager;\nimport android.os.Build;\nimport android.os.Bundle;\nimport android.widget.Button;\nimport android.widget.Toast;\nimport androidx.appcompat.app.AppCompatActivity;\nimport androidx.core.app.NotificationCompat;\nimport androidx.core.app.NotificationManagerCompat;\n\npublic class MainActivity extends AppCompatActivity {\n    private static final String CHANNEL_ID = "my_channel";\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n\n        createNotificationChannel();\n\n        Button btnNotify = findViewById(R.id.btnNotify);\n        btnNotify.setOnClickListener(v -> {\n            // Show a Toast message\n            Toast.makeText(MainActivity.this, "Notification created!", Toast.LENGTH_SHORT).show();\n\n            // Build and display the notification\n            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)\n                    .setSmallIcon(R.drawable.ic_launcher_foreground) // Add a small icon to your drawable folder\n                    .setContentTitle("My Notification")\n                    .setContentText("This is a toast and notification demo.")\n                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);\n\n            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);\n            // notificationId is a unique int for each notification that you must define\n            notificationManager.notify(1, builder.build());\n        });\n    }\n\n    private void createNotificationChannel() {\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n            CharSequence name = "My Channel";\n            String description = "Channel for my app notifications";\n            int importance = NotificationManager.IMPORTANCE_DEFAULT;\n            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);\n            channel.setDescription(description);\n            NotificationManager notificationManager = getSystemService(NotificationManager.class);\n            notificationManager.createNotificationChannel(channel);\n        }\n    }\n}` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-3',
             title: 'User Registration Screen',
             objective: 'Develop a mobile app with a registration screen. On submission, validate the user input and register the user.',
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-3',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'A simple registration UI. The Java code performs basic validation to ensure fields are not empty before showing a success toast.',
+                codeSnippets: [
+                  { language: 'xml', code: `<!-- activity_main.xml -->\n<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"\n    android:layout_width="match_parent"\n    android:layout_height="match_parent"\n    android:orientation="vertical"\n    android:padding="16dp">\n\n    <EditText\n        android:id="@+id/etUsername"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:hint="Username" />\n\n    <EditText\n        android:id="@+id/etEmail"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:inputType="textEmailAddress"\n        android:hint="Email" />\n\n    <EditText\n        android:id="@+id/etPassword"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:inputType="textPassword"\n        android:hint="Password" />\n\n    <Button\n        android:id="@+id/btnRegister"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:text="Register" />\n\n</LinearLayout>` },
+                  { language: 'java', code: `// MainActivity.java\npackage com.example.registerdemo;\n\nimport android.os.Bundle;\nimport android.text.TextUtils;\nimport android.widget.Button;\nimport android.widget.EditText;\nimport android.widget.Toast;\nimport androidx.appcompat.app.AppCompatActivity;\n\npublic class MainActivity extends AppCompatActivity {\n    EditText etUsername, etEmail, etPassword;\n    Button btnRegister;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n\n        etUsername = findViewById(R.id.etUsername);\n        etEmail = findViewById(R.id.etEmail);\n        etPassword = findViewById(R.id.etPassword);\n        btnRegister = findViewById(R.id.btnRegister);\n\n        btnRegister.setOnClickListener(v -> {\n            String username = etUsername.getText().toString().trim();\n            String email = etEmail.getText().toString().trim();\n            String password = etPassword.getText().toString().trim();\n\n            if (TextUtils.isEmpty(username) || TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {\n                Toast.makeText(MainActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();\n            } else {\n                // In a real app, you would save this to a database.\n                Toast.makeText(MainActivity.this, "User Registered Successfully!", Toast.LENGTH_SHORT).show();\n            }\n        });\n    }\n}` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-4',
             title: 'User Login and Welcome Screen',
             objective: 'Develop a mobile app with login and welcome screens. On submission, validate the user details, and upon success, navigate to the welcome screen.',
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-4',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'This example has two activities. `LoginActivity` validates hardcoded credentials and starts `WelcomeActivity` on success. This demonstrates basic multi-activity navigation.',
+                codeSnippets: [
+                  { language: 'xml', code: `<!-- activity_login.xml -->\n<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"\n    android:layout_width="match_parent"\n    android:layout_height="match_parent"\n    android:orientation="vertical"\n    android:padding="16dp">\n\n    <EditText\n        android:id="@+id/etEmail"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:hint="Email (user@example.com)" />\n\n    <EditText\n        android:id="@+id/etPassword"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:inputType="textPassword"\n        android:hint="Password (password123)" />\n\n    <Button\n        android:id="@+id/btnLogin"\n        android:layout_width="match_parent"\n        android:layout_height="wrap_content"\n        android:text="Login" />\n\n</LinearLayout>` },
+                  { language: 'java', code: `// LoginActivity.java\npackage com.example.logindemo;\n\nimport android.content.Intent;\nimport android.os.Bundle;\nimport android.widget.Button;\nimport android.widget.EditText;\nimport android.widget.Toast;\nimport androidx.appcompat.app.AppCompatActivity;\n\npublic class LoginActivity extends AppCompatActivity {\n    EditText etEmail, etPassword;\n    Button btnLogin;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_login);\n\n        etEmail = findViewById(R.id.etEmail);\n        etPassword = findViewById(R.id.etPassword);\n        btnLogin = findViewById(R.id.btnLogin);\n\n        btnLogin.setOnClickListener(v -> {\n            String email = etEmail.getText().toString().trim();\n            String password = etPassword.getText().toString().trim();\n\n            // Dummy validation\n            if (email.equals("user@example.com") && password.equals("password123")) {\n                Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();\n                Intent intent = new Intent(LoginActivity.this, WelcomeActivity.class);\n                intent.putExtra("USER_EMAIL", email);\n                startActivity(intent);\n                finish(); // Close login activity\n            } else {\n                Toast.makeText(LoginActivity.this, "Invalid Credentials", Toast.LENGTH_SHORT).show();\n            }\n        });\n    }\n}` },
+                  { language: 'xml', code: `<!-- activity_welcome.xml -->\n<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"\n    android:layout_width="match_parent"\n    android:layout_height="match_parent"\n    android:padding="16dp">\n\n    <TextView\n        android:id="@+id/tvWelcome"\n        android:layout_width="wrap_content"\n        android:layout_height="wrap_content"\n        android:layout_centerInParent="true"\n        android:textSize="24sp"\n        android:text="Welcome!" />\n\n</RelativeLayout>` },
+                  { language: 'java', code: `// WelcomeActivity.java\npackage com.example.logindemo;\n\nimport android.os.Bundle;\nimport android.widget.TextView;\nimport androidx.appcompat.app.AppCompatActivity;\n\npublic class WelcomeActivity extends AppCompatActivity {\n    TextView tvWelcome;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_welcome);\n\n        tvWelcome = findViewById(R.id.tvWelcome);\n        String userEmail = getIntent().getStringExtra("USER_EMAIL");\n\n        tvWelcome.setText("Welcome, " + userEmail);\n    }\n}` },
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-5',
             title: 'Flutter SDK and Dart Project Setup',
             objective: 'Install and configure the Flutter SDK. Create a new Dart project using IntelliJ IDEA.',
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-5',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'This is the standard "counter app" that is generated when you create a new Flutter project. It demonstrates the basic structure of a Flutter app with a stateful widget.',
+                codeSnippets: [
+                  { language: 'dart', code: `// main.dart\nimport 'package:flutter/material.dart';\n\nvoid main() {\n  runApp(const MyApp());\n}\n\nclass MyApp extends StatelessWidget {\n  const MyApp({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return MaterialApp(\n      title: 'Flutter Demo',\n      theme: ThemeData(\n        primarySwatch: Colors.blue,\n      ),\n      home: const MyHomePage(title: 'Flutter Demo Home Page'),\n    );\n  }\n}\n\nclass MyHomePage extends StatefulWidget {\n  const MyHomePage({super.key, required this.title});\n\n  final String title;\n\n  @override\n  State<MyHomePage> createState() => _MyHomePageState();\n}\n\nclass _MyHomePageState extends State<MyHomePage> {\n  int _counter = 0;\n\n  void _incrementCounter() {\n    setState(() {\n      _counter++;\n    });\n  }\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(\n        title: Text(widget.title),\n      ),\n      body: Center(\n        child: Column(\n          mainAxisAlignment: MainAxisAlignment.center,\n          children: <Widget>[\n            const Text(\n              'You have pushed the button this many times:',\n            ),\n            Text(\n              '$_counter',\n              style: Theme.of(context).textTheme.headlineMedium,\n            ),\n          ],\n        ),\n      ),\n      floatingActionButton: FloatingActionButton(\n        onPressed: _incrementCounter,\n        tooltip: 'Increment',\n        child: const Icon(Icons.add),\n      ),\n    );\n  }\n}` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-6',
             title: 'Navigation and Routing in Flutter',
             objective: "Create a navigation and routing system for a sample 'Pizza Store' application in Flutter.",
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-6',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'A basic example of navigating from a `HomePage` to a `PizzaPage` using `Navigator.push()`. This is the simplest form of routing in Flutter.',
+                codeSnippets: [
+                  { language: 'dart', code: `// main.dart\nimport 'package:flutter/material.dart';\n\nvoid main() => runApp(const MyApp());\n\nclass MyApp extends StatelessWidget {\n  const MyApp({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return const MaterialApp(\n      title: 'Pizza Store',\n      home: HomePage(),\n    );\n  }\n}\n\nclass HomePage extends StatelessWidget {\n  const HomePage({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(title: const Text('Pizza Store Home')),\n      body: Center(\n        child: ElevatedButton(\n          child: const Text('See Pizzas'),\n          onPressed: () {\n            // Navigate to the second screen\n            Navigator.push(\n              context,\n              MaterialPageRoute(builder: (context) => const PizzaPage()),\n            );\n          },\n        ),\n      ),\n    );\n  }\n}\n\nclass PizzaPage extends StatelessWidget {\n  const PizzaPage({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(title: const Text('Our Pizzas')),\n      body: const Center(\n        child: Text('Margherita, Pepperoni, Veggie...'),\n      ),\n    );\n  }\n}` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-7',
             title: 'Password Reset Functionality in Flutter',
             objective: "Implement a 'forgot password' option in the Pizza Store App, allowing users to reset their password via a link sent to their email.",
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-7',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'This code provides the UI for a "Forgot Password" screen. It includes a text field for the email and a button. No actual email-sending logic is included.',
+                codeSnippets: [
+                  { language: 'dart', code: `// forgot_password_screen.dart\nimport 'package:flutter/material.dart';\n\nclass ForgotPasswordScreen extends StatelessWidget {\n  const ForgotPasswordScreen({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(title: const Text('Reset Password')),\n      body: Padding(\n        padding: const EdgeInsets.all(16.0),\n        child: Column(\n          mainAxisAlignment: MainAxisAlignment.center,\n          children: [\n            const Text('Enter your email to receive a password reset link.'),\n            const SizedBox(height: 20),\n            const TextField(\n              keyboardType: TextInputType.emailAddress,\n              decoration: InputDecoration(\n                labelText: 'Email',\n                border: OutlineInputBorder(),\n              ),\n            ),\n            const SizedBox(height: 20),\n            ElevatedButton(\n              onPressed: () {\n                // In a real app, you would call your backend/Firebase here.\n                ScaffoldMessenger.of(context).showSnackBar(\n                  const SnackBar(content: Text('Password reset link sent! (mock)')),\n                );\n              },\n              child: const Text('Send Reset Link'),\n            ),\n          ],\n        ),\n      ),\n    );\n  }\n}` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-8',
             title: 'User Profile UI with Firebase',
             objective: 'Create a user profile interface in a mobile application and integrate it with Firebase for data storage and retrieval.',
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-8',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'A simple, stateless UI for a user profile page. This can be used as a starting point before integrating Firebase to fetch and display real user data.',
+                codeSnippets: [
+                  { language: 'dart', code: `// profile_screen.dart\nimport 'package:flutter/material.dart';\n\nclass ProfileScreen extends StatelessWidget {\n  const ProfileScreen({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(title: const Text('User Profile')),\n      body: Center(\n        child: Column(\n          children: const [\n            SizedBox(height: 40),\n            CircleAvatar(\n              radius: 50,\n              // In a real app, use NetworkImage with user's photo URL\n              backgroundImage: NetworkImage('https://via.placeholder.com/150'),\n            ),\n            SizedBox(height: 20),\n            Text(\n              'John Doe', // Fetch from Firebase\n              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),\n            ),\n            SizedBox(height: 10),\n            Text(\n              'john.doe@example.com', // Fetch from Firebase\n              style: TextStyle(fontSize: 16, color: Colors.grey),\n            ),\n          ],\n        ),\n      ),\n    );\n  }\n}` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-9',
             title: 'Flask Environment and HTML Templates',
             objective: 'Set up a virtual environment for Flask and create HTML templates for a web application with various menu items.',
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-9',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'A minimal Flask application that renders an HTML template. This shows the basic file structure with an `app.py` file and a `templates` folder.',
+                codeSnippets: [
+                  { language: 'python', code: `# app.py\nfrom flask import Flask, render_template\n\napp = Flask(__name__)\n\n@app.route('/')\ndef home():\n    return render_template('index.html')\n\nif __name__ == '__main__':\n    app.run(debug=True)` },
+                  { language: 'html', code: `<!-- templates/index.html -->\n<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <title>My Web App</title>\n</head>\n<body>\n    <nav>\n        <a href="/">Home</a> |\n        <a href="/about">About</a> |\n        <a href="/contact">Contact</a>\n    </nav>\n    <h1>Welcome to the Home Page!</h1>\n</body>\n</html>` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-10',
             title: 'Handling Form Data with Flask',
             objective: 'Design an HTML form to get data from the client-side user. Access this data on the server using a POST request in a Flask application.',
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-10',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'This Flask app has a single route that handles both GET (to display the form) and POST (to process the form data). The submitted name is displayed back to the user.',
+                codeSnippets: [
+                  { language: 'python', code: `# app.py\nfrom flask import Flask, render_template, request\n\napp = Flask(__name__)\n\n@app.route('/', methods=['GET', 'POST'])\ndef index():\n    if request.method == 'POST':\n        name = request.form.get('name')\n        return f'Hello, {name}!'\n    return render_template('form.html')\n\nif __name__ == '__main__':\n    app.run(debug=True)` },
+                  { language: 'html', code: `<!-- templates/form.html -->\n<!DOCTYPE html>\n<html lang="en">\n<head>\n    <title>Form Example</title>\n</head>\n<body>\n    <h1>Enter Your Name</h1>\n    <form method="post">\n        <input type="text" name="name" required>\n        <button type="submit">Submit</button>\n    </form>\n</body>\n</html>` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-11',
             title: 'Login and Welcome Pages in Flask',
             objective: 'Develop a web application with login and welcome pages using Flask. Validate user details on submission and navigate to the welcome page upon success.',
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-11',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'A basic Flask login system. It uses `redirect` and `url_for` to navigate between the login and welcome pages. User details are hardcoded for simplicity.',
+                codeSnippets: [
+                  { language: 'python', code: `# app.py\nfrom flask import Flask, render_template, request, redirect, url_for\n\napp = Flask(__name__)\n\n@app.route('/login', methods=['GET', 'POST'])\ndef login():\n    error = None\n    if request.method == 'POST':\n        # Dummy validation\n        if request.form['username'] == 'admin' and request.form['password'] == 'secret':\n            return redirect(url_for('welcome', username=request.form['username']))\n        else:\n            error = 'Invalid Credentials. Please try again.'\n    return render_template('login.html', error=error)\n\n@app.route('/welcome/<username>')\ndef welcome(username):\n    return render_template('welcome.html', user=username)\n\nif __name__ == '__main__':\n    app.run(debug=True)` },
+                  { language: 'html', code: `<!-- templates/login.html -->\n<!DOCTYPE html><html><head><title>Login</title></head><body>\n    <h2>Login Page</h2>\n    {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}\n    <form method="post">\n        <p>Username: <input type="text" name="username"></p>\n        <p>Password: <input type="password" name="password"></p>\n        <p><input type="submit" value="Login"></p>\n    </form>\n</body></html>` },
+                  { language: 'html', code: `<!-- templates/welcome.html -->\n<!DOCTYPE html><html><head><title>Welcome</title></head><body>\n    <h1>Welcome, {{ user }}!</h1>\n</body></html>` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
           {
             id: 'exp-ad-12',
             title: 'Simple Python Chatbot with Flask',
             objective: 'Implement a simple chatbot in a Flask web application that can answer Python-related questions from a predefined text file.',
-            contributions: [],
+            contributions: [
+              {
+                id: 'contrib-ad-12',
+                author: 'Initial Contribution',
+                type: ContributionType.Code,
+                content: 'This is a very basic rule-based chatbot. The `responses` dictionary acts as our "text file" knowledge base. The app takes user input from a form and displays the corresponding response.',
+                codeSnippets: [
+                  { language: 'python', code: `# app.py\nfrom flask import Flask, render_template, request\n\napp = Flask(__name__)\n\n# Simple dictionary to act as our knowledge base\nresponses = {\n    "what is python?": "Python is a high-level, interpreted programming language.",\n    "what is a variable?": "A variable is a container for storing data values.",\n    "what is a list?": "A list is a collection which is ordered and changeable. Allows duplicate members.",\n    "hello": "Hi there! How can I help you with Python?"\n}\n\n@app.route('/', methods=['GET', 'POST'])\ndef chatbot():\n    answer = None\n    question = ''\n    if request.method == 'POST':\n        question = request.form['question'].lower().strip()\n        # Find a response, or use a default one\n        answer = responses.get(question, "Sorry, I don't understand that question.")\n    return render_template('chat.html', question=question, answer=answer)\n\nif __name__ == '__main__':\n    app.run(debug=True)` },
+                  { language: 'html', code: `<!-- templates/chat.html -->\n<!DOCTYPE html>\n<html lang="en">\n<head><title>Python Chatbot</title></head>\n<body>\n    <h1>Simple Python Chatbot</h1>\n    <form method="post">\n        <input type="text" name="question" size="50" placeholder="Ask a Python question..." required>\n        <button type="submit">Ask</button>\n    </form>\n    {% if question %}\n        <p><b>You asked:</b> {{ question }}</p>\n    {% endif %}\n    {% if answer %}\n        <p><b>Bot says:</b> {{ answer }}</p>\n    {% endif %}\n</body>\n</html>` }
+                ],
+                upvotes: 0,
+                createdAt: new Date(),
+              }
+            ],
           },
         ],
       },

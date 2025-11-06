@@ -28,7 +28,6 @@ const parseDates = (obj: any): any => {
     for (const key of Object.keys(obj)) {
         if (key === 'createdAt' && typeof obj[key] === 'string') {
             const date = new Date(obj[key]);
-            // Only assign if the date is valid. Otherwise, log a warning and leave the original string.
             if (!isNaN(date.getTime())) {
                 obj[key] = date;
             } else {
@@ -43,7 +42,6 @@ const parseDates = (obj: any): any => {
 
 const performSave = async (data: Department[]): Promise<void> => {
     try {
-        // Upsert ensures the row is created if it doesn't exist, or updated if it does.
         const { error } = await supabase
             .from(TABLE_NAME)
             .upsert({ id: ROW_ID, data: data });
@@ -63,49 +61,71 @@ export const getData = async (): Promise<Department[]> => {
             .from(TABLE_NAME)
             .select('data')
             .eq('id', ROW_ID)
-            .maybeSingle(); // Use maybeSingle to avoid an error if no rows are found.
+            .maybeSingle();
 
         if (error) {
             throw error;
         }
 
-        // If data is null or malformed, it means no data in DB or it's corrupted.
+        // Scenario 1: Database is empty. Initialize with MOCK_DATA.
         if (!data || !data.data || !Array.isArray(data.data) || data.data.length === 0) {
-             console.warn("Supabase data not found or is malformed. Falling back to local MOCK_DATA.");
-             // Try to save the mock data to initialize the DB for the next load.
-             saveData(MOCK_DATA);
+             console.warn("Supabase data not found. Initializing with local data.");
+             await performSave(MOCK_DATA);
              return MOCK_DATA;
         }
         
-        const remoteData: Department[] = data.data;
+        // Scenario 2: Database has data. Merge to ensure it's up-to-date without overwriting user content.
+        let remoteData: Department[] = JSON.parse(JSON.stringify(data.data)); // Deep copy
+        let needsUpdate = false;
 
-        // Check if content is outdated.
-        const csDept = remoteData.find((d) => d.id === 'dept-cs');
-        const dvLab = csDept?.subjects.find((s) => s.id === 'subj-dv');
-        const adLab = csDept?.subjects.find((s) => s.id === 'subj-ad');
-        const javaLab = csDept?.subjects.find((s) => s.id === 'subj-java');
-        
-        const isDvLabOutdated = !dvLab || dvLab.experiments.length < 12 || !dvLab.driveLink || !dvLab.githubLink;
-        const isAdLabOutdated = !adLab || adLab.experiments.length < 12;
-        const isJavaLabMissing = !javaLab || javaLab.experiments.length < 12;
+        MOCK_DATA.forEach(mockDept => {
+            let remoteDept = remoteData.find(d => d.id === mockDept.id);
+            if (!remoteDept) {
+                remoteData.push(mockDept);
+                needsUpdate = true;
+            } else {
+                mockDept.subjects.forEach(mockSubj => {
+                    let remoteSubj = remoteDept.subjects.find(s => s.id === mockSubj.id);
+                    if (!remoteSubj) {
+                        remoteDept.subjects.push(mockSubj);
+                        needsUpdate = true;
+                    } else {
+                        // Update subject metadata
+                        if (remoteSubj.name !== mockSubj.name) { remoteSubj.name = mockSubj.name; needsUpdate = true; }
+                        if (remoteSubj.code !== mockSubj.code) { remoteSubj.code = mockSubj.code; needsUpdate = true; }
+                        if (remoteSubj.driveLink !== mockSubj.driveLink) { remoteSubj.driveLink = mockSubj.driveLink; needsUpdate = true; }
+                        if (remoteSubj.githubLink !== mockSubj.githubLink) { remoteSubj.githubLink = mockSubj.githubLink; needsUpdate = true; }
 
-        if (isDvLabOutdated || isAdLabOutdated || isJavaLabMissing) {
-            console.warn("Supabase data is outdated or missing required subjects/experiments. Using up-to-date local data and saving it.");
-            saveData(MOCK_DATA); // Overwrite outdated remote data
-            return MOCK_DATA;
+                        mockSubj.experiments.forEach(mockExp => {
+                            let remoteExp = remoteSubj.experiments.find(e => e.id === mockExp.id);
+                            if (!remoteExp) {
+                                remoteSubj.experiments.push(mockExp);
+                                needsUpdate = true;
+                            } else {
+                                // Update experiment metadata, but NEVER overwrite contributions.
+                                if (remoteExp.title !== mockExp.title) { remoteExp.title = mockExp.title; needsUpdate = true; }
+                                if (remoteExp.objective !== mockExp.objective) { remoteExp.objective = mockExp.objective; needsUpdate = true; }
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        if (needsUpdate) {
+            console.log("Local data structure is newer. Merging and updating Supabase.");
+            saveData(remoteData);
         }
 
-        console.log("Successfully fetched and validated data from Supabase.");
+        console.log("Successfully fetched and merged data from Supabase.");
         return parseDates(remoteData);
 
     } catch (error) {
-        console.error('Could not fetch data from Supabase, falling back to local mock data:', (error as Error).message);
+        console.error('Could not fetch/process data from Supabase, falling back to local mock data:', (error as Error).message);
         return MOCK_DATA;
     }
 };
 
-
-// Create a debounced version of the save function to avoid rapid-fire API calls.
 const debouncedSave = debounce(performSave, 1500);
 
 export const saveData = (data: Department[]): void => {
