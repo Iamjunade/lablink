@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Contribution, ContributionType } from '../types';
+import { Contribution, ContributionType, CodeSnippet } from '../types';
 
 // Add Prism to the window object for TypeScript
 declare global {
     interface Window {
         Prism: {
+            highlightAllUnder: (element: Element) => void;
             highlightElement: (element: Element) => void;
         };
     }
@@ -30,6 +32,45 @@ const CopyIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375v-3.375c0-.621-.504-1.125-1.125-1.125h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125h1.5a1.125 1.125 0 0 1 1.125 1.125v3.375m-6.375-10.375a1.125 1.125 0 0 0-1.125-1.125H6.75c-.621 0-1.125.504-1.125 1.125v9.75c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V15.75m-6.375-10.375a1.125 1.125 0 0 0-1.125-1.125H6.75" />
     </svg>
 );
+const EditIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+    </svg>
+);
+
+const CodeBlock: React.FC<{ language: string, code: string }> = ({ language, code }) => {
+    const [copyStatus, setCopyStatus] = useState('Copy');
+    const codeRef = useRef<HTMLElement | null>(null);
+
+    useEffect(() => {
+        if (codeRef.current && window.Prism) {
+            window.Prism.highlightElement(codeRef.current);
+        }
+    }, [language, code]);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(code).then(() => {
+            setCopyStatus('Copied!');
+            setTimeout(() => setCopyStatus('Copy'), 2000);
+        }, () => {
+            setCopyStatus('Failed!');
+            setTimeout(() => setCopyStatus('Copy'), 2000);
+        });
+    };
+
+    return (
+        <div className="bg-gray-900 rounded-md text-sm dark:bg-black/50">
+            <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700 dark:border-gray-800">
+                <span className="text-xs font-semibold text-gray-400 uppercase">{language || 'Code'}</span>
+                <button onClick={handleCopy} className="flex items-center space-x-1 text-xs text-gray-400 hover:text-white dark:hover:text-gray-200">
+                    <CopyIcon className="w-4 h-4" />
+                    <span>{copyStatus}</span>
+                </button>
+            </div>
+            <pre className="p-4 overflow-x-auto"><code ref={codeRef} className={`language-${(language || 'javascript').toLowerCase()}`}>{code}</code></pre>
+        </div>
+    );
+};
 
 
 const ContributionCard: React.FC<{
@@ -37,12 +78,12 @@ const ContributionCard: React.FC<{
     isAdminAuthenticated: boolean;
     onDelete: () => void;
     onUpvote: () => void;
-}> = ({ contribution, isAdminAuthenticated, onDelete, onUpvote }) => {
+    onEdit: (contribution: Contribution) => void;
+}> = ({ contribution, isAdminAuthenticated, onDelete, onUpvote, onEdit }) => {
     
     const upvotedStorageKey = 'lablink_upvoted';
     const [isUpvoted, setIsUpvoted] = useState(false);
-    const [copyStatus, setCopyStatus] = useState('Copy');
-    const codeRef = useRef<HTMLElement | null>(null);
+    const cardRef = useRef<HTMLDivElement>(null);
     
     useEffect(() => {
         try {
@@ -54,9 +95,9 @@ const ContributionCard: React.FC<{
     }, [contribution.id]);
 
     useEffect(() => {
-        // When the card mounts or the contribution content changes, highlight the code.
-        if (contribution.type === ContributionType.Code && codeRef.current && window.Prism) {
-            window.Prism.highlightElement(codeRef.current);
+        if (contribution.type === ContributionType.Code && cardRef.current && window.Prism) {
+            // Re-run prism on the whole card when contribution changes to catch all code blocks
+            window.Prism.highlightAllUnder(cardRef.current);
         }
     }, [contribution]);
 
@@ -74,18 +115,9 @@ const ContributionCard: React.FC<{
         }
     };
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(contribution.content).then(() => {
-            setCopyStatus('Copied!');
-            setTimeout(() => setCopyStatus('Copy'), 2000);
-        }, () => {
-            setCopyStatus('Failed!');
-            setTimeout(() => setCopyStatus('Copy'), 2000);
-        });
-    };
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg p-5 transition-shadow hover:shadow-md dark:bg-gray-900/70 dark:border-gray-800 dark:hover:border-primary-900">
+        <div ref={cardRef} className="bg-white border border-gray-200 rounded-lg p-5 transition-shadow hover:shadow-md dark:bg-gray-900/70 dark:border-gray-800 dark:hover:border-primary-900">
             <div className="flex justify-between items-start">
                 <div>
                     <div className="flex items-center space-x-3">
@@ -114,28 +146,40 @@ const ContributionCard: React.FC<{
                         <span>{contribution.upvotes}</span>
                     </button>
                     {isAdminAuthenticated && (
-                        <button 
-                            onClick={onDelete}
-                            className="p-2 -m-2 text-gray-400 hover:text-red-600 dark:hover:text-red-500 rounded-md transition-colors"
-                            aria-label="Delete contribution"
-                        >
-                            <TrashIcon className="w-5 h-5" />
-                        </button>
+                        <>
+                            <button 
+                                onClick={() => onEdit(contribution)}
+                                className="p-2 -m-2 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-500 rounded-md transition-colors"
+                                aria-label="Edit contribution"
+                            >
+                                <EditIcon className="w-5 h-5" />
+                            </button>
+                            <button 
+                                onClick={onDelete}
+                                className="p-2 -m-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500 rounded-md transition-colors"
+                                aria-label="Delete contribution"
+                            >
+                                <TrashIcon className="w-5 h-5" />
+                            </button>
+                        </>
                     )}
                 </div>
             </div>
             <div className="mt-4">
                 {contribution.type === ContributionType.Code && (
-                    /* The `language-xxxx` class and the `prism-tomorrow` theme in index.html work together for highlighting. */
-                    <div className="bg-gray-900 rounded-md text-sm dark:bg-black/50">
-                         <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700 dark:border-gray-800">
-                            <span className="text-xs font-semibold text-gray-400 uppercase">{contribution.language || 'Code'}</span>
-                            <button onClick={handleCopy} className="flex items-center space-x-1 text-xs text-gray-400 hover:text-white dark:hover:text-gray-200">
-                                <CopyIcon className="w-4 h-4" />
-                                <span>{copyStatus}</span>
-                            </button>
-                        </div>
-                        <pre className="p-4 overflow-x-auto"><code ref={codeRef} className={`language-${(contribution.language || 'javascript').toLowerCase()}`}>{contribution.content}</code></pre>
+                    <div>
+                        {contribution.content && <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-4 dark:text-gray-300">{contribution.content}</p>}
+                        
+                        {contribution.codeSnippets && contribution.codeSnippets.length > 0 ? (
+                            <div className="space-y-4">
+                                {contribution.codeSnippets.map((snippet, index) => (
+                                    <CodeBlock key={index} language={snippet.language} code={snippet.code} />
+                                ))}
+                            </div>
+                        ) : (
+                            // Fallback for old data format
+                            <CodeBlock language={contribution.language || 'text'} code={contribution.content} />
+                        )}
                     </div>
                 )}
                  {contribution.type === ContributionType.Viva && (

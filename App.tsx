@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Department, Subject, Experiment, Contribution } from './types';
 import { getData, saveData } from './services/dataService';
@@ -89,7 +90,13 @@ const App: React.FC = () => {
                     const experimentTitleMatch = exp.title.toLowerCase().includes(lowerCaseQuery);
 
                     exp.contributions.forEach(contrib => {
-                        const contentMatch = contrib.content.toLowerCase().includes(lowerCaseQuery);
+                        let contentMatch = contrib.content.toLowerCase().includes(lowerCaseQuery);
+                        if (contrib.type === 'Code Snippet' && contrib.codeSnippets) {
+                            if (!contentMatch) { // Only search snippets if description didn't match
+                                contentMatch = contrib.codeSnippets.some(snippet => snippet.code.toLowerCase().includes(lowerCaseQuery));
+                            }
+                        }
+
                         const questionMatch = contrib.question?.toLowerCase().includes(lowerCaseQuery);
                         const authorMatch = contrib.author.toLowerCase().includes(lowerCaseQuery);
 
@@ -142,6 +149,27 @@ const App: React.FC = () => {
         experiments: subj.experiments.map(exp => {
           if (exp.id === experimentId) {
             return { ...exp, contributions: [...exp.contributions, contribution] };
+          }
+          return exp;
+        }),
+      })),
+    }));
+    updateAndSaveData(newDepartments);
+  };
+
+  const handleUpdateContribution = (experimentId: string, updatedContribution: Contribution) => {
+    const newDepartments = departments.map(dept => ({
+      ...dept,
+      subjects: dept.subjects.map(subj => ({
+        ...subj,
+        experiments: subj.experiments.map(exp => {
+          if (exp.id === experimentId) {
+            return {
+              ...exp,
+              contributions: exp.contributions.map(c =>
+                c.id === updatedContribution.id ? updatedContribution : c
+              ),
+            };
           }
           return exp;
         }),
@@ -355,6 +383,7 @@ const App: React.FC = () => {
                     experiment={selectedExperiment} 
                     onBack={handleBackToDashboard} 
                     onAddContribution={handleAddContribution}
+                    onUpdateContribution={handleUpdateContribution}
                     isAdminAuthenticated={isAdminAuthenticated}
                     onDeleteContribution={handleDeleteContribution}
                     onUpvoteContribution={handleUpvoteContribution}

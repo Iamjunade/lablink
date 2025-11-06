@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Experiment, Contribution, ContributionType } from '../types';
 import { generateVivaQuestions } from '../services/geminiService';
@@ -42,12 +43,13 @@ interface ExperimentViewProps {
   experiment: Experiment;
   onBack: () => void;
   onAddContribution: (experimentId: string, contribution: Contribution) => void;
+  onUpdateContribution: (experimentId: string, contribution: Contribution) => void;
   isAdminAuthenticated: boolean;
   onDeleteContribution: (experimentId: string, contributionId: string) => void;
   onUpvoteContribution: (experimentId: string, contributionId: string) => void;
 }
 
-const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onAddContribution, isAdminAuthenticated, onDeleteContribution, onUpvoteContribution }) => {
+const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onAddContribution, onUpdateContribution, isAdminAuthenticated, onDeleteContribution, onUpvoteContribution }) => {
   const TABS = [
     { name: ContributionType.Code, icon: CodeIcon },
     { name: ContributionType.Viva, icon: VivaIcon },
@@ -57,6 +59,7 @@ const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onA
   
   const [activeTab, setActiveTab] = useState<ContributionType>(TABS[0].name);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingContribution, setEditingContribution] = useState<Contribution | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   
   const filteredContributions = experiment.contributions
@@ -71,23 +74,48 @@ const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onA
     }
     setIsGenerating(false);
   };
-  
-  const handleAddContribution = (contribution: Omit<Contribution, 'id' | 'upvotes' | 'createdAt'>) => {
-    const newContribution: Contribution = {
-        ...contribution,
-        id: `user-${Date.now()}`,
-        upvotes: 0,
-        createdAt: new Date(),
-    };
-    onAddContribution(experiment.id, newContribution);
+
+  const handleOpenEditModal = (contribution: Contribution) => {
+    setEditingContribution(contribution);
+    setIsModalOpen(true);
   };
+  
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setEditingContribution(null);
+  };
+
+  const handleModalSubmit = (contributionData: Omit<Contribution, 'id' | 'upvotes' | 'createdAt'>) => {
+    if (editingContribution) {
+        // Update existing contribution
+        const updatedContribution: Contribution = {
+            ...editingContribution,
+            ...contributionData,
+            author: contributionData.author || 'Anonymous', // Ensure author is not empty
+        };
+        onUpdateContribution(experiment.id, updatedContribution);
+    } else {
+        // Add new contribution
+        const newContribution: Contribution = {
+            ...contributionData,
+            id: `user-${Date.now()}`,
+            upvotes: 0,
+            createdAt: new Date(),
+            author: contributionData.author || 'Anonymous',
+        };
+        onAddContribution(experiment.id, newContribution);
+    }
+    handleModalClose();
+  };
+
 
   return (
     <div className="max-w-7xl mx-auto">
         <AddContributionModal
             isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={handleAddContribution}
+            onClose={handleModalClose}
+            onSubmit={handleModalSubmit}
+            contributionToEdit={editingContribution}
         />
       <button onClick={onBack} className="flex items-center space-x-2 text-sm font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 mb-6">
         <BackIcon className="w-5 h-5" />
@@ -114,7 +142,7 @@ const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onA
                 </nav>
             </div>
              <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => { setEditingContribution(null); setIsModalOpen(true); }}
                 className="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white font-semibold rounded-lg shadow-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
             >
                 Add Contribution
@@ -145,6 +173,7 @@ const ExperimentView: React.FC<ExperimentViewProps> = ({ experiment, onBack, onA
                             isAdminAuthenticated={isAdminAuthenticated} 
                             onDelete={() => onDeleteContribution(experiment.id, c.id)}
                             onUpvote={() => onUpvoteContribution(experiment.id, c.id)}
+                            onEdit={handleOpenEditModal}
                         />
                     ))}
                 </div>

@@ -79,12 +79,18 @@ export const getData = async (): Promise<Department[]> => {
         
         const remoteData: Department[] = data.data;
 
-        // Check if content is outdated (using a heuristic from previous implementation)
+        // Check if content is outdated.
         const csDept = remoteData.find((d) => d.id === 'dept-cs');
         const dvLab = csDept?.subjects.find((s) => s.id === 'subj-dv');
+        const adLab = csDept?.subjects.find((s) => s.id === 'subj-ad');
+        const javaLab = csDept?.subjects.find((s) => s.id === 'subj-java');
         
-        if (!dvLab || dvLab.experiments.length < 12 || !dvLab.driveLink || !dvLab.githubLink) {
-            console.warn("Supabase data is outdated or missing required fields. Using up-to-date local data and saving it.");
+        const isDvLabOutdated = !dvLab || dvLab.experiments.length < 12 || !dvLab.driveLink || !dvLab.githubLink;
+        const isAdLabOutdated = !adLab || adLab.experiments.length < 12;
+        const isJavaLabMissing = !javaLab || javaLab.experiments.length < 12;
+
+        if (isDvLabOutdated || isAdLabOutdated || isJavaLabMissing) {
+            console.warn("Supabase data is outdated or missing required subjects/experiments. Using up-to-date local data and saving it.");
             saveData(MOCK_DATA); // Overwrite outdated remote data
             return MOCK_DATA;
         }

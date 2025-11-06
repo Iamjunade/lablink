@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ subjectName, onToggleSidebar, isAdmin, 
         <div className="flex-1 flex justify-center px-4">
             <div className="relative w-full max-w-lg">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <SearchIcon className="h-5 w-5 text-gray-400" />
+                    <SearchIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                 </div>
                 <input
                     type="search"
@@ -75,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({ subjectName, onToggleSidebar, isAdmin, 
                 />
                  {searchQuery && (
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <button onClick={() => onSearchChange('')} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <button onClick={() => onSearchChange('')} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                             <XCircleIcon className="h-5 w-5" />
                         </button>
                     </div>

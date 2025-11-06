@@ -6,13 +6,19 @@ export enum ContributionType {
   Diagram = 'Diagram/Flowchart',
 }
 
+export interface CodeSnippet {
+  language: string;
+  code: string;
+}
+
 export interface Contribution {
   id: string;
   author: string;
   type: ContributionType;
   content: string; 
   imageUrl?: string;
-  language?: string;
+  language?: string; // Kept for backward compatibility
+  codeSnippets?: CodeSnippet[]; // For multi-code contributions
   question?: string;
   upvotes: number;
   createdAt: Date;
@@ -27,7 +33,7 @@ export interface Experiment {
 }
 
 export interface Subject {
-  id: string;
+  id:string;
   name: string;
   code: string;
   experiments: Experiment[];
