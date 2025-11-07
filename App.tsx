@@ -9,6 +9,7 @@ import ExperimentView from './components/ExperimentView';
 import AdminDashboard from './components/AdminDashboard';
 import PasswordModal from './components/PasswordModal';
 import SearchResultsView, { SearchResult } from './components/SearchResultsView';
+import FocusModeOverlay from './components/FocusModeOverlay';
 
 const App: React.FC = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -24,6 +25,7 @@ const App: React.FC = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isFocusMode, setIsFocusMode] = useState(false);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -47,6 +49,33 @@ const App: React.FC = () => {
     }
   }, []);
   
+  // Focus Mode key handler
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+        const target = event.target as HTMLElement;
+        const isTyping = ['INPUT', 'TEXTAREA'].includes(target.tagName) || target.isContentEditable;
+
+        if (isTyping) {
+            return;
+        }
+
+        if (event.code === 'Space') {
+            event.preventDefault();
+            setIsFocusMode(prev => !prev);
+        }
+
+        if (event.code === 'Escape' && isFocusMode) {
+            setIsFocusMode(false);
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isFocusMode]);
+
   // Derive the selected experiment object from the ID and the main departments array.
   // This ensures the displayed data is always in sync with the source of truth.
   const selectedExperiment = useMemo(() => {
@@ -401,6 +430,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans dark:bg-gray-950">
+        {isFocusMode && <FocusModeOverlay onClose={() => setIsFocusMode(false)} />}
         <PasswordModal isOpen={isPasswordModalOpen} onClose={() => setPasswordModalOpen(false)} onSubmit={handlePasswordSubmit} />
         <Sidebar 
             departments={departments} 
