@@ -26,6 +26,7 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -78,6 +79,28 @@ const App: React.FC = () => {
         window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isFocusMode]);
+
+  // Full Screen handler
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  }, []);
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
 
   // Derive the selected experiment object from the ID and the main departments array.
   // This ensures the displayed data is always in sync with the source of truth.
@@ -452,6 +475,8 @@ const App: React.FC = () => {
             onToggleTheme={toggleTheme}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
+            isFullScreen={isFullScreen}
+            onToggleFullScreen={toggleFullScreen}
         />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-950 p-4 md:p-8">
             {renderContent()}
