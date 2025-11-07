@@ -59,12 +59,15 @@ const App: React.FC = () => {
             return;
         }
 
+        // Space bar now only activates the focus mode
         if (event.code === 'Space') {
             event.preventDefault();
-            setIsFocusMode(prev => !prev);
+            setIsFocusMode(true);
         }
 
+        // Escape key is the only way to exit
         if (event.code === 'Escape' && isFocusMode) {
+            event.preventDefault(); // Prevent other escape actions
             setIsFocusMode(false);
         }
     };
@@ -430,7 +433,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans dark:bg-gray-950">
-        {isFocusMode && <FocusModeOverlay onClose={() => setIsFocusMode(false)} />}
+        {isFocusMode && <FocusModeOverlay />}
         <PasswordModal isOpen={isPasswordModalOpen} onClose={() => setPasswordModalOpen(false)} onSubmit={handlePasswordSubmit} />
         <Sidebar 
             departments={departments} 
