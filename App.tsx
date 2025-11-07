@@ -50,7 +50,16 @@ const App: React.FC = () => {
     }
   }, []);
   
-  // Focus Mode key handler
+  const enterBlackFullScreen = () => {
+    // Show black overlay immediately, then request fullscreen.
+    // The fullscreenchange listener will sync states if it fails or is exited.
+    setIsFocusMode(true);
+    document.documentElement.requestFullscreen().catch(() => {
+        setIsFocusMode(false); // Revert if request fails
+    });
+  };
+
+  // Combined full-screen and black screen key handler
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
         const target = event.target as HTMLElement;
@@ -60,16 +69,12 @@ const App: React.FC = () => {
             return;
         }
 
-        // Space bar now only activates the focus mode
+        // Space bar activates the combined black full screen mode
         if (event.code === 'Space') {
             event.preventDefault();
-            setIsFocusMode(true);
-        }
-
-        // Escape key is the only way to exit
-        if (event.code === 'Escape' && isFocusMode) {
-            event.preventDefault(); // Prevent other escape actions
-            setIsFocusMode(false);
+            if (!document.fullscreenElement) {
+                enterBlackFullScreen();
+            }
         }
     };
 
@@ -78,25 +83,28 @@ const App: React.FC = () => {
     return () => {
         window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isFocusMode]);
+  }, []); // Run only once
 
-  // Full Screen handler
+  // Full Screen change listener to synchronize states
   useEffect(() => {
     const handleFullScreenChange = () => {
-      setIsFullScreen(!!document.fullscreenElement);
+      const isCurrentlyFullScreen = !!document.fullscreenElement;
+      setIsFullScreen(isCurrentlyFullScreen);
+      // If we exit full-screen for any reason (like pressing Esc), hide the black overlay.
+      if (!isCurrentlyFullScreen) {
+        setIsFocusMode(false);
+      }
     };
     document.addEventListener('fullscreenchange', handleFullScreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
-  }, []);
+  }, []); // Run only once
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-      });
+      enterBlackFullScreen();
     } else {
       if (document.exitFullscreen) {
-        document.exitFullscreen();
+        document.exitFullscreen(); // The event listener will turn off the focus mode
       }
     }
   };
