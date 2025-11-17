@@ -1,5 +1,4 @@
 import { Department } from '../types';
-import { MOCK_DATA } from '../constants';
 import { supabase } from './supabaseClient';
 
 const TABLE_NAME = 'lab_data';
@@ -40,6 +39,26 @@ const parseDates = (obj: any): any => {
     return obj;
 };
 
+let cachedMockData: Department[] | null = null;
+const getMockData = async (): Promise<Department[]> => {
+    if (cachedMockData) {
+        return cachedMockData;
+    }
+    try {
+        const response = await fetch('./MOCK_DATA.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        cachedMockData = parseDates(data);
+        return cachedMockData!;
+    } catch (e) {
+        console.error("CRITICAL: Failed to load MOCK_DATA.json. Fallback data will be empty.", e);
+        cachedMockData = []; // Set to empty array to prevent repeated fetch attempts
+        return cachedMockData; 
+    }
+}
+
 const performSave = async (data: Department[]): Promise<void> => {
     try {
         const { error } = await supabase
@@ -56,6 +75,8 @@ const performSave = async (data: Department[]): Promise<void> => {
 };
 
 export const getData = async (): Promise<Department[]> => {
+    const MOCK_DATA = await getMockData();
+    
     try {
         const { data, error } = await supabase
             .from(TABLE_NAME)

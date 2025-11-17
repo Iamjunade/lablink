@@ -7,4 +7,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error("Supabase URL and anon key are required.");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Disable session persistence as it can cause issues in sandboxed environments
+// and is not needed for this app's functionality. This is a likely fix for
+// the generic "Failed to fetch" error.
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: false
+    }
+});
