@@ -67,6 +67,14 @@ const AddContributionModal: React.FC<AddContributionModalProps> = ({ isOpen, onC
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isEditing) {
+            const isConfirmed = window.confirm("Are you sure you want to update this contribution?");
+            if (!isConfirmed) {
+                return; // Stop the submission if the user cancels
+            }
+        }
+        
         let contributionData: Omit<Contribution, 'id' | 'upvotes' | 'createdAt'>;
         
         if (type === ContributionType.Code) {
