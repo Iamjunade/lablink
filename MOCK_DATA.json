@@ -525,44 +525,6 @@
             ]
           }
         ]
-      },
-      {
-        "id": "subj-dbms",
-        "name": "Database Management System Lab",
-        "code": "CS406L",
-        "driveLink": "",
-        "githubLink": "",
-        "experiments": [
-          {
-            "id": "exp-dbms-1",
-            "title": "Week 4: Basic Table Creation and Insertion Queries",
-            "objective": "To understand and practice writing basic SQL DDL (Data Definition Language) and DML (Data Manipulation Language) commands by creating a schema for a small database and populating it with initial data.",
-            "contributions": [
-              {
-                "id": "contrib-dbms-1",
-                "author": "Initial Contribution",
-                "type": "Code Snippet",
-                "content": "SQL queries to create and populate the Sailors, Boats, and Reserves tables for a basic database management system.",
-                "codeSnippets": [
-                  { 
-                    "language": "sql", 
-                    "code": "CREATE TABLE Sailors (\n    SID INT PRIMARY KEY,\n    SName VARCHAR(20),\n    Rating INT,\n    Age FLOAT\n);\n\nINSERT INTO Sailors VALUES\n(22,'Dustin',7,45.0),\n(29,'Brutus',1,33.0),\n(31,'Lubber',8,55.5),\n(32,'Andy',8,25.5),\n(58,'Rusty',10,35.0),\n(64,'Horatio',7,35.0),\n(71,'Zorba',10,16.0),\n(85,'Art',3,25.5),\n(95,'Bob',3,63.5);" 
-                  },
-                  { 
-                    "language": "sql", 
-                    "code": "CREATE TABLE Boats (\n    BID INT PRIMARY KEY,\n    BName VARCHAR(20),\n    Color VARCHAR(10)\n);\n\nINSERT INTO Boats VALUES\n(101,'Interlake','Blue'),\n(102,'Interlake','Red'),\n(103,'Clipper','Green'),\n(104,'Marine','Red');" 
-                  },
-                  { 
-                    "language": "sql", 
-                    "code": "CREATE TABLE Reserves (\n    SID INT,\n    BID INT,\n    Day DATE,\n    FOREIGN KEY (SID) REFERENCES Sailors(SID),\n    FOREIGN KEY (BID) REFERENCES Boats(BID)\n);\n\nINSERT INTO Reserves VALUES\n(22,101,'1998-10-10'),\n(22,102,'1998-10-10'),\n(22,103,'1998-10-08'),\n(22,104,'1998-10-07'),\n(31,102,'1998-11-10'),\n(31,104,'1998-11-12'),\n(64,102,'1998-09-08'),\n(74,103,'1998-09-08');" 
-                  }
-                ],
-                "upvotes": 0,
-                "createdAt": "2024-05-21T10:00:00Z"
-              }
-            ]
-          }
-        ]
       }
     ]
   },

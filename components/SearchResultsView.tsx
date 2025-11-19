@@ -1,5 +1,6 @@
 import React from 'react';
 import { Contribution, Experiment, Subject, Department, ContributionType } from '../types';
+import { SearchIcon } from './common/Icons';
 
 export interface SearchResult {
     contribution: Contribution;
@@ -13,12 +14,6 @@ interface SearchResultsViewProps {
     results: SearchResult[];
     onResultClick: (result: SearchResult) => void;
 }
-
-const SearchIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-    </svg>
-);
 
 const SearchResultsView: React.FC<SearchResultsViewProps> = ({ query, results, onResultClick }) => {
 
@@ -56,14 +51,22 @@ const SearchResultsView: React.FC<SearchResultsViewProps> = ({ query, results, o
                             key={`${result.contribution.id}-${index}`}
                             onClick={() => onResultClick(result)}
                             className="p-5 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-200 cursor-pointer dark:bg-gray-900 dark:border-gray-800"
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`View ${result.contribution.type} for ${result.experiment.title}`}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    onResultClick(result);
+                                }
+                            }}
                         >
                             <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                {result.department.name} &gt; {result.subject.name} &gt; <span className="font-semibold">{result.experiment.title}</span>
+                                {result.department.name} &gt; {result.subject.name} &gt; <span className="font-semibold">{highlightText(result.experiment.title, query)}</span>
                             </p>
                             <h3 className="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
                                 {result.contribution.type === ContributionType.Viva && result.contribution.question
                                     ? highlightText(result.contribution.question, query)
-                                    : `${result.contribution.type} by ${result.contribution.author}`
+                                    : highlightText(`${result.contribution.type} by ${result.contribution.author}`, query)
                                 }
                             </h3>
                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">

@@ -1,20 +1,21 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Contribution, ContributionType } from "../types";
 
-const API_KEY = process.env.API_KEY;
-
-let ai: GoogleGenAI | null = null;
-
-if (API_KEY) {
-  ai = new GoogleGenAI({ apiKey: API_KEY });
-} else {
-  console.error("Gemini API key not found. AI features will be disabled.");
-}
+// Safely access process.env.API_KEY, as 'process' might not be defined in all browser environments
+const getApiKey = (): string | undefined => {
+  return typeof process !== 'undefined' && process.env && process.env.API_KEY ? process.env.API_KEY : undefined;
+};
 
 export const generateVivaQuestions = async (experimentTitle: string, experimentObjective: string): Promise<Contribution[]> => {
-  if (!ai) {
+  const API_KEY = getApiKey();
+
+  if (!API_KEY) {
+    console.error("Gemini API key not found or process.env is unavailable. AI features will be disabled.");
     return [];
   }
+
+  // Initialize GoogleGenAI right before making the API call
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
 
   try {
     const prompt = `
@@ -23,10 +24,9 @@ export const generateVivaQuestions = async (experimentTitle: string, experimentO
       Format the output as a JSON array of objects, where each object has a "question" and "answer" property.
     `;
     
-    // Fix: Use responseSchema to ensure the model returns structured JSON data, which is more robust.
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
+        model: 'gemini-3-pro-preview', // Changed model for complex text tasks
+        contents: { parts: [{ text: prompt }] }, // Explicitly define content as parts
         config: {
           responseMimeType: 'application/json',
           responseSchema: {
@@ -49,7 +49,7 @@ export const generateVivaQuestions = async (experimentTitle: string, experimentO
         }
     });
 
-    const text = response.text;
+    const text = response.text; // Access text as a property
     const generatedPairs: { question: string, answer: string }[] = JSON.parse(text);
 
     return generatedPairs.map((pair, index) => ({

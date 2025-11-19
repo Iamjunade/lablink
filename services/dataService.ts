@@ -1,42 +1,67 @@
 import { Department } from '../types';
-import { supabase } from './supabaseClient';
+import { getSupabaseClient } from './supabaseClient'; // Import the function to get the supabase client
 
-const TABLE_NAME = 'lab_data';
-const ROW_ID = 'main_data'; // The single row ID to store our JSON blob
-
-// Utility to debounce function calls
-const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
-    let timeout: ReturnType<typeof setTimeout> | null = null;
-  
-    const debounced = (...args: Parameters<F>) => {
-      if (timeout !== null) {
-        clearTimeout(timeout);
-        timeout = null;
-      }
-      timeout = setTimeout(() => func(...args), waitFor);
-    };
-  
-    return debounced as (...args: Parameters<F>) => void;
-};
+const LOCAL_STORAGE_KEY = 'lablink_app_data';
 
 // Utility to recursively parse date strings into Date objects
-const parseDates = (obj: any): any => {
-    if (obj === null || typeof obj !== 'object') {
-        return obj;
+const parseDates = (data: any): any => {
+    if (data === null || typeof data !== 'object') {
+        return data;
     }
-    for (const key of Object.keys(obj)) {
-        if (key === 'createdAt' && typeof obj[key] === 'string') {
-            const date = new Date(obj[key]);
-            if (!isNaN(date.getTime())) {
-                obj[key] = date;
+
+    if (Array.isArray(data)) {
+        return data.map(item => parseDates(item));
+    }
+
+    const newData: { [key: string]: any } = {};
+    for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) { // Use hasOwnProperty for safety
+            if (key === 'createdAt' && typeof data[key] === 'string') {
+                const date = new Date(data[key]);
+                if (!isNaN(date.getTime())) {
+                    newData[key] = date;
+                } else {
+                    console.warn(`Invalid date string encountered and skipped: ${data[key]}`);
+                    newData[key] = data[key]; // Keep original malformed string if conversion fails
+                }
+            } else if (typeof data[key] === 'object') {
+                newData[key] = parseDates(data[key]);
             } else {
-                 console.warn(`Invalid date string encountered and skipped: ${obj[key]}`);
+                newData[key] = data[key];
             }
-        } else if (typeof obj[key] === 'object') {
-            parseDates(obj[key]);
         }
     }
-    return obj;
+    return newData;
+};
+
+// Defensive programming: Ensure nested arrays exist and filter out any invalid (null/undefined) entries to prevent crashes.
+const sanitizeData = (departments: Department[]): Department[] => {
+    if (!Array.isArray(departments)) return [];
+    
+    return departments.filter(Boolean).map(dept => {
+        const sanitizedDept = { ...dept };
+        
+        // Process subjects within this department
+        sanitizedDept.subjects = (Array.isArray(dept.subjects) ? dept.subjects : [])
+            .filter(Boolean)
+            .map(subj => {
+                const sanitizedSubj = { ...subj };
+                
+                // Process experiments within this subject
+                sanitizedSubj.experiments = (Array.isArray(subj.experiments) ? subj.experiments : [])
+                    .filter(Boolean)
+                    .map(exp => {
+                        const sanitizedExp = { ...exp };
+                        
+                        // Process contributions within this experiment
+                        sanitizedExp.contributions = (Array.isArray(exp.contributions) ? exp.contributions : [])
+                            .filter(Boolean); // Filter contributions
+                        return sanitizedExp;
+                    });
+                return sanitizedSubj;
+            });
+        return sanitizedDept;
+    });
 };
 
 let cachedMockData: Department[] | null = null;
@@ -50,7 +75,8 @@ const getMockData = async (): Promise<Department[]> => {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        cachedMockData = parseDates(data);
+        const parsedData = parseDates(data); // Parse dates first
+        cachedMockData = parsedData; // Cache the parsed data
         return cachedMockData!;
     } catch (e) {
         console.error("CRITICAL: Failed to load MOCK_DATA.json. Fallback data will be empty.", e);
@@ -59,96 +85,81 @@ const getMockData = async (): Promise<Department[]> => {
     }
 }
 
-const performSave = async (data: Department[]): Promise<void> => {
-    try {
-        const { error } = await supabase
-            .from(TABLE_NAME)
-            .upsert({ id: ROW_ID, data: data });
-
-        if (error) {
-            throw error;
-        }
-        console.log('Data saved successfully to Supabase.');
-    } catch (error) {
-        console.error('Error saving data to Supabase:', error);
-    }
-};
-
 export const getData = async (): Promise<Department[]> => {
-    const MOCK_DATA = await getMockData();
-    
-    try {
-        const { data, error } = await supabase
-            .from(TABLE_NAME)
-            .select('data')
-            .eq('id', ROW_ID)
-            .maybeSingle();
+    const supabase = getSupabaseClient();
+    if (supabase) {
+        try {
+            const { data, error } = await supabase
+                .from('app_data')
+                .select('json_data')
+                .eq('id', 1)
+                .single();
 
-        if (error) {
-            throw error;
-        }
-
-        // Scenario 1: Database is empty. Initialize with MOCK_DATA.
-        if (!data || !data.data || !Array.isArray(data.data) || data.data.length === 0) {
-             console.warn("Supabase data not found. Initializing with local data.");
-             await performSave(MOCK_DATA);
-             return MOCK_DATA;
-        }
-        
-        // Scenario 2: Database has data. Merge to ensure it's up-to-date without overwriting user content.
-        let remoteData: Department[] = JSON.parse(JSON.stringify(data.data)); // Deep copy
-        let needsUpdate = false;
-
-        MOCK_DATA.forEach(mockDept => {
-            let remoteDept = remoteData.find(d => d.id === mockDept.id);
-            if (!remoteDept) {
-                remoteData.push(mockDept);
-                needsUpdate = true;
-            } else {
-                mockDept.subjects.forEach(mockSubj => {
-                    let remoteSubj = remoteDept.subjects.find(s => s.id === mockSubj.id);
-                    if (!remoteSubj) {
-                        remoteDept.subjects.push(mockSubj);
-                        needsUpdate = true;
-                    } else {
-                        // Update subject metadata
-                        if (remoteSubj.name !== mockSubj.name) { remoteSubj.name = mockSubj.name; needsUpdate = true; }
-                        if (remoteSubj.code !== mockSubj.code) { remoteSubj.code = mockSubj.code; needsUpdate = true; }
-                        if (remoteSubj.driveLink !== mockSubj.driveLink) { remoteSubj.driveLink = mockSubj.driveLink; needsUpdate = true; }
-                        if (remoteSubj.githubLink !== mockSubj.githubLink) { remoteSubj.githubLink = mockSubj.githubLink; needsUpdate = true; }
-
-                        mockSubj.experiments.forEach(mockExp => {
-                            let remoteExp = remoteSubj.experiments.find(e => e.id === mockExp.id);
-                            if (!remoteExp) {
-                                remoteSubj.experiments.push(mockExp);
-                                needsUpdate = true;
-                            } else {
-                                // Update experiment metadata, but NEVER overwrite contributions.
-                                if (remoteExp.title !== mockExp.title) { remoteExp.title = mockExp.title; needsUpdate = true; }
-                                if (remoteExp.objective !== mockExp.objective) { remoteExp.objective = mockExp.objective; needsUpdate = true; }
-                            }
-                        });
-                    }
-                });
+            if (error) {
+                console.warn("Supabase data fetch failed, checking local storage:", error.message);
+                // Fall through to check localStorage
+            } else if (data && data.json_data) {
+                console.log("Data loaded successfully from Supabase.");
+                // Sync latest data from Supabase to localStorage
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data.json_data));
+                return sanitizeData(parseDates(data.json_data));
             }
-        });
-
-        if (needsUpdate) {
-            console.log("Local data structure is newer. Merging and updating Supabase.");
-            saveData(remoteData);
+        } catch (e) {
+            console.error("Supabase client error during fetch, checking local storage:", e);
+            // Fall through
         }
-
-        console.log("Successfully fetched and merged data from Supabase.");
-        return parseDates(remoteData);
-
-    } catch (error) {
-        console.error('Could not fetch/process data from Supabase, falling back to local mock data:', (error as Error).message);
-        return MOCK_DATA;
+    } else {
+         console.warn("Supabase client not available, checking local storage.");
     }
+
+    // Fallback 1: Try loading from localStorage
+    try {
+        const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (localData) {
+            console.log("Data loaded from localStorage (offline mode).");
+            return sanitizeData(parseDates(JSON.parse(localData)));
+        }
+    } catch (e) {
+        console.error("Failed to read or parse data from localStorage:", e);
+    }
+
+    // Fallback 2: Load initial mock data if nothing else is available
+    console.log("No Supabase or localStorage data found, loading initial mock data.");
+    const rawData = await getMockData();
+    return sanitizeData(rawData);
 };
 
-const debouncedSave = debounce(performSave, 1500);
 
-export const saveData = (data: Department[]): void => {
-    debouncedSave(data);
+export const saveData = async (data: Department[]): Promise<void> => {
+    const supabase = getSupabaseClient();
+    let savedToSupabase = false;
+
+    if (supabase) {
+        try {
+            const { error } = await supabase
+                .from('app_data')
+                .upsert({ id: 1, json_data: data });
+
+            if (error) {
+                console.error("Supabase data save operation failed:", error.message);
+            } else {
+                console.log("Data saved successfully to Supabase.");
+                savedToSupabase = true;
+            }
+        } catch (e) {
+            console.error("Supabase client error during data save operation:", e);
+        }
+    }
+
+    // If Supabase is not available or the save failed, persist to localStorage as a fallback.
+    if (!savedToSupabase) {
+        try {
+            // JSON.stringify will automatically convert Date objects to ISO 8601 strings,
+            // which our parseDates function can handle on load.
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+            console.log("Data saved to localStorage (offline mode).");
+        } catch (e) {
+            console.error("Failed to save data to localStorage:", e);
+        }
+    }
 };

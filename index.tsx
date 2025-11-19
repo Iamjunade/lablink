@@ -1,7 +1,11 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { setup } from '@twind/core';
+import config from './twind.config';
+
+// Initialize Twind
+setup(config);
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -14,4 +18,3 @@ root.render(
     <App />
   </React.StrictMode>
 );
-   
